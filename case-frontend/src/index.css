@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Keep existing pages working until they’re migrated to Tailwind */
+body {
+  margin: 0;
+}

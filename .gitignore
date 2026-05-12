@@ -1,0 +1,38 @@
+# ── Secrets & Environment ──
+.env
+.env.*
+!.env.example
+
+# ── Dependencies ──
+node_modules/
+vendor/
+
+# ── Build Outputs ──
+/case-frontend/build/
+/case-portal/public/build/
+/case-portal/public/hot/
+/case-portal/public/storage/
+/case-portal/storage/*.key
+/case-portal/storage/pail/
+
+# ── IDE / OS ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.fleet/
+.nova/
+.zed/
+*.log
+
+# ── PHP ──
+.phpunit.result.cache
+.phpunit.cache
+.phpactor.json
+auth.json
+Homestead.json
+Homestead.yaml
+
+# ── Misc ──
+/lawyer-dashboard/node_modules/
+/lawyer-dashboard/client/node_modules/
