@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { getStoredUser, saveSession } from "../services/auth";
+import { getStoredUser, saveSession, clearSession } from "../services/auth";
 import "../App.css";
 
 /* ── Ambient Background (Reused) ── */
@@ -26,6 +26,11 @@ export default function ProfileSettings() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(user?.photo_url || "");
   const [saving, setSaving] = useState(false);
+
+  const handleLogout = () => {
+    clearSession();
+    navigate("/");
+  };
 
   useEffect(() => {
     if (!file) return;
@@ -68,7 +73,10 @@ export default function ProfileSettings() {
             <h1 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>PROFILE SETTINGS</h1>
             <p style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>Judicial identity & digital avatar</p>
           </div>
-          <button className="ghost-btn" onClick={() => navigate("/dashboard")}>← BACK</button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="ghost-btn" onClick={() => navigate("/dashboard")}>← BACK</button>
+            <button className="ghost-btn logout" style={{ color: '#ff4d4d', opacity: 0.9, borderColor: 'rgba(255,77,77,0.2)' }} onClick={handleLogout}>🚪 LOGOUT</button>
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>

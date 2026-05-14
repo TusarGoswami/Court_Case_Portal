@@ -634,13 +634,15 @@ function Dashboard() {
               { label: "Documents", icon: "📄" }
             ] : []),
             { label: "Messages", icon: "💬" },
-            { label: "Profile Settings", icon: "⚙️" }
+            { label: "Profile Settings", icon: "⚙️" },
+            { label: "Logout", icon: "🚪" }
           ].map((item) => (
             <button
               key={item.label}
               className={`menu-item ${activeMenu === item.label ? "active" : ""}`}
               onClick={() => {
                 if (item.label === "Profile Settings") navigate("/profile");
+                else if (item.label === "Logout") handleLogout();
                 else setActiveMenu(item.label);
               }}
             >
@@ -654,11 +656,6 @@ function Dashboard() {
           <button className={`theme-btn ${theme === "midnight" ? "active" : ""}`} onClick={() => setTheme("midnight")}>🌙</button>
           <button className={`theme-btn ${theme === "chambers" ? "active" : ""}`} onClick={() => setTheme("chambers")}>🌿</button>
         </div>
-
-        <button className="menu-item logout" onClick={handleLogout}>
-          <i>🚪</i>
-          <span className="menu-item-text">Logout</span>
-        </button>
       </aside>
 
       <main className="dashboard-main">

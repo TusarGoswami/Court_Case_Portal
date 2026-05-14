@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { clearSession } from "../services/auth";
 import "../App.css";
 
 const API_BASE = api?.defaults?.baseURL || "http://127.0.0.1:8000/api";
@@ -149,6 +150,11 @@ export default function CreateCase() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingId, setBookingId] = useState(null);
 
+  const handleLogout = () => {
+    clearSession();
+    navigate("/");
+  };
+
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", address: "", caseTitle: "", caseCategory: "Criminal", caseDescription: "", incidentDate: "", opponentName: "", jurisdiction: "Delhi", emergency: false, declarationAccepted: false, signature: "" });
   const [uploadBuckets, setUploadBuckets] = useState({ firCopy: [], idProof: [], supporting: [], media: [], pdfEvidence: [] });
   const [uploadProgress, setUploadProgress] = useState({});
@@ -271,7 +277,10 @@ export default function CreateCase() {
             <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: '2.5rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>DIGITAL CASE FILING</h1>
             <p style={{ color: 'var(--muted)', letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase' }}>Judicial Submission Portal — Citizen Service</p>
           </div>
-          <button className="ghost-btn" style={{ color: 'var(--text)', opacity: 0.7 }} onClick={() => navigate("/dashboard")}>← BACK TO DASHBOARD</button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="ghost-btn" style={{ color: 'var(--text)', opacity: 0.7 }} onClick={() => navigate("/dashboard")}>← BACK TO DASHBOARD</button>
+            <button className="ghost-btn logout" style={{ color: '#ff4d4d', opacity: 0.9, borderColor: 'rgba(255,77,77,0.2)' }} onClick={handleLogout}>🚪 LOGOUT</button>
+          </div>
         </header>
 
         <StepRibbon steps={["CASE DETAILS", "LEGAL EXPERT", "CONFIRM SLOT"]} currentStep={step} />
