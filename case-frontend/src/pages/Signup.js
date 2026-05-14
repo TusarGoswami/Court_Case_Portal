@@ -10,6 +10,7 @@ function Signup() {
   const [splashFading, setSplashFading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -42,6 +43,21 @@ function Signup() {
   };
 
   const isFocused = (f) => focusedField === f;
+
+  // Icons Helper
+  const Icon = ({ type }) => {
+    const icons = {
+      user: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />,
+      mail: <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6" />,
+      phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.81 12.81 0 0 0 .62 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.62A2 2 0 0 1 22 16.92z" />,
+      lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>
+    };
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+        {icons[type]}
+      </svg>
+    );
+  };
 
 /* ── Judicial Seal SVG (ghosted watermark) ── */
 const JudicialSeal = () => (
@@ -108,17 +124,96 @@ const JudicialSeal = () => (
           75%  { transform: rotate(-3deg) scale(1); }
           100% { transform: rotate(0deg) scale(1); opacity: 1; }
         }
+        @keyframes inputGlow {
+          0% { box-shadow: 0 0 5px rgba(212,175,55,0.1), inset 0 0 5px rgba(212,175,55,0.05); }
+          100% { box-shadow: 0 0 15px rgba(212,175,55,0.2), inset 0 0 10px rgba(212,175,55,0.1); }
+        }
+
         .signup-split { display: grid; grid-template-columns: 45fr 55fr; min-height: 100vh; }
+        
+        .glass-card {
+           background: rgba(15, 23, 42, 0.4);
+           backdrop-filter: blur(20px);
+           border: 1px solid rgba(255, 255, 255, 0.05);
+           border-radius: 24px;
+           padding: clamp(24px, 5vw, 48px);
+           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group {
+           position: relative;
+           display: flex;
+           align-items: center;
+        }
+
+        .input-icon-wrapper {
+           position: absolute;
+           left: 14px;
+           color: #5A6A7A;
+           transition: color 0.3s;
+           display: flex;
+           align-items: center;
+           pointer-events: none;
+        }
+
         .cinematic-input {
-           padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
-           color: #fff; background: rgba(0,0,0,0.4); outline: none; transition: border-color 0.3s;
+           width: 100%;
+           padding: 12px 16px 12px 42px;
+           border: 1px solid rgba(136, 153, 170, 0.18);
+           border-radius: 12px;
+           color: #fff;
+           background: rgba(5, 10, 20, 0.4);
+           outline: none;
+           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+           font-size: 0.9rem;
         }
-        .cinematic-input:focus { border-color: #D4AF37; }
+
+        .cinematic-input:focus {
+           border-color: #D4AF37;
+           background: rgba(5, 10, 20, 0.6);
+           animation: inputGlow 1.5s infinite alternate;
+        }
+
+        .cinematic-input:focus ~ .input-icon-wrapper {
+           color: #D4AF37;
+        }
+
+        .password-toggle {
+           position: absolute;
+           right: 14px;
+           background: none;
+           border: none;
+           color: #5A6A7A;
+           cursor: pointer;
+           font-size: 0.7rem;
+           font-weight: 700;
+           letter-spacing: 0.05em;
+           transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+           color: #D4AF37;
+        }
+
         .cinematic-btn {
-           padding: 14px; background: #D4AF37; border: none; color: #080B1A; font-weight: 700;
-           letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.3s;
+           padding: 14px;
+           background: linear-gradient(135deg, #D4AF37, #B8962E);
+           border: none;
+           border-radius: 12px;
+           color: #080B1A;
+           font-weight: 700;
+           font-family: 'Cinzel', serif;
+           letter-spacing: 0.1em;
+           cursor: pointer;
+           transition: all 0.3s;
+           box-shadow: 0 4px 20px rgba(212,175,55,0.2);
         }
-        .cinematic-btn:hover { opacity: 0.9; }
+
+        .cinematic-btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 8px 32px rgba(212,175,55,0.35);
+        }
+
         @media (max-width: 900px) {
           .signup-split { grid-template-columns: 1fr; }
           .signup-hero-panel { display: none; }
@@ -248,13 +343,18 @@ const JudicialSeal = () => (
         <div style={{
           display: "flex", flexDirection: "column",
           background: "linear-gradient(170deg, #0F1A35 0%, #0B132B 100%)",
+          position: "relative",
+          overflow: "hidden"
         }}>
+          <JudicialSeal />
+          
           {/* Top bar */}
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
             padding: "12px 28px",
             borderBottom: "1px solid rgba(212,175,55,0.1)",
             fontSize: "0.76rem", color: "#5A6A7A",
+            zIndex: 2
           }}>
             <span>support@ecourt.gov.in</span>
             <span style={{
@@ -266,109 +366,125 @@ const JudicialSeal = () => (
           {/* Scrollable form area */}
           <div style={{
             flex: 1, overflowY: "auto",
-            padding: "clamp(24px, 4vw, 40px) clamp(24px, 5vw, 56px)",
-            animation: mounted ? "contentReveal 0.7s 0.2s ease both" : "none",
+            padding: "clamp(24px, 4vw, 60px) clamp(24px, 5vw, 80px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2
           }}>
-            <h1 style={{
-              fontFamily: "'Cinzel', serif",
-              fontSize: "clamp(1.4rem, 2.5vw, 1.8rem)",
-              color: "#FFFFFF", margin: "0 0 4px", fontWeight: 700,
-            }}>Establish Credentials</h1>
-            <p style={{ color: "#6B7A8A", fontSize: "0.88rem", margin: "0 0 28px" }}>
-              Create your secure account to access court services
-            </p>
-
-            <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
-              {/* Row: Name + Email */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div>
-                  <label style={lbl}>Full name</label>
-                  <input style={inp(isFocused("name"))} placeholder="Enter full name"
-                    value={form.name}
-                    onFocus={() => setFocusedField("name")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </div>
-                <div>
-                  <label style={lbl}>Email address</label>
-                  <input type="email" style={inp(isFocused("email"))} placeholder="Enter email"
-                    value={form.email}
-                    onFocus={() => setFocusedField("email")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                </div>
-              </div>
-
-              {/* Row: Phone + Role */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div>
-                  <label style={lbl}>Mobile number</label>
-                  <input style={inp(isFocused("phone"))} placeholder="Enter mobile number"
-                    value={form.phone}
-                    onFocus={() => setFocusedField("phone")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                </div>
-                <div>
-                  <label style={lbl}>Role</label>
-                  <select style={inp(isFocused("role"))}
-                    value={form.role}
-                    onFocus={() => setFocusedField("role")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                    <option value="public_user">Public User</option>
-                    <option value="lawyer">Lawyer</option>
-                    <option value="clerk">Clerk</option>
-                    <option value="judge">Judge</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Row: Password + Confirm */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div>
-                  <label style={lbl}>Password</label>
-                  <input type="password" style={inp(isFocused("pw"))} placeholder="Create password"
-                    value={form.password}
-                    onFocus={() => setFocusedField("pw")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })} />
-                </div>
-                <div>
-                  <label style={lbl}>Confirm password</label>
-                  <input type="password" style={inp(isFocused("cpw"))} placeholder="Confirm password"
-                    value={form.password_confirmation}
-                    onFocus={() => setFocusedField("cpw")} onBlur={() => setFocusedField(null)}
-                    onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} />
-                </div>
-              </div>
-
-              <label style={{
-                display: "flex", alignItems: "center", gap: 10,
-                color: "#6B7A8A", fontSize: "0.82rem", marginTop: 4,
-              }}>
-                <input type="checkbox" style={{ width: 16, height: 16, accentColor: "#D4AF37" }}
-                  checked={form.terms_accepted}
-                  onChange={(e) => setForm({ ...form, terms_accepted: e.target.checked })} />
-                I agree to the Terms &amp; Conditions and Privacy Policy
-              </label>
-
-              <button type="submit" style={btnGold}
-                onMouseEnter={(e) => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 32px rgba(212,175,55,0.35)"; }}
-                onMouseLeave={(e) => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = "0 4px 20px rgba(212,175,55,0.2)"; }}>
-                Create Account
-              </button>
-            </form>
-
-            <p style={{ textAlign: "center", color: "#5A6A7A", fontSize: "0.86rem", marginTop: 20 }}>
-              Already have an account?{" "}
-              <Link to="/" style={{ color: "#D4AF37", fontWeight: 600, textDecoration: "none" }}>Login</Link>
-            </p>
-
-            {/* Bottom security badge */}
-            <div style={{
-              display: "flex", justifyContent: "center", gap: 24, marginTop: 28,
-              paddingTop: 20, borderTop: "1px solid rgba(212,175,55,0.08)",
+            <div className="glass-card" style={{
+              width: "100%",
+              maxWidth: "580px",
+              animation: mounted ? "contentReveal 0.7s 0.2s ease both" : "none",
             }}>
-              {["🔒 Secure Platform", "⚡ Time Saving", "✨ Easy to Use"].map((t) => (
-                <span key={t} style={{ color: "#4A5A6A", fontSize: "0.74rem", fontWeight: 500 }}>{t}</span>
-              ))}
+              <h1 style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "1.8rem",
+                color: "#FFFFFF", margin: "0 0 6px", fontWeight: 700,
+              }}>Registry Enrollment</h1>
+              <p style={{ color: "#6B7A8A", fontSize: "0.9rem", margin: "0 0 32px" }}>
+                Establish your digital credentials in the ECMS ecosystem.
+              </p>
+
+              <form onSubmit={handleSubmit} style={{ display: "grid", gap: 20 }}>
+                {/* Row: Name + Email */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={lbl}>Full name</label>
+                    <div className="input-group">
+                      <input className="cinematic-input" placeholder="Name"
+                        value={form.name}
+                        onFocus={() => setFocusedField("name")} onBlur={() => setFocusedField(null)}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                      <div className="input-icon-wrapper"><Icon type="user" /></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Email address</label>
+                    <div className="input-group">
+                      <input className="cinematic-input" type="email" placeholder="Email"
+                        value={form.email}
+                        onFocus={() => setFocusedField("email")} onBlur={() => setFocusedField(null)}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                      <div className="input-icon-wrapper"><Icon type="mail" /></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row: Phone + Role */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={lbl}>Mobile number</label>
+                    <div className="input-group">
+                      <input className="cinematic-input" placeholder="Phone"
+                        value={form.phone}
+                        onFocus={() => setFocusedField("phone")} onBlur={() => setFocusedField(null)}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                      <div className="input-icon-wrapper"><Icon type="phone" /></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Assigned Role</label>
+                    <select className="cinematic-input" style={{ paddingLeft: 16 }}
+                      value={form.role}
+                      onFocus={() => setFocusedField("role")} onBlur={() => setFocusedField(null)}
+                      onChange={(e) => setForm({ ...form, role: e.target.value })}>
+                      <option value="public_user">Public User</option>
+                      <option value="lawyer">Advocate</option>
+                      <option value="clerk">Clerk</option>
+                      <option value="judge">Judge</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row: Password + Confirm */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={lbl}>Password</label>
+                    <div className="input-group">
+                      <input className="cinematic-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                        value={form.password}
+                        onFocus={() => setFocusedField("pw")} onBlur={() => setFocusedField(null)}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                      <div className="input-icon-wrapper"><Icon type="lock" /></div>
+                      <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? "HIDE" : "SHOW"}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Verification</label>
+                    <div className="input-group">
+                      <input className="cinematic-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                        value={form.password_confirmation}
+                        onFocus={() => setFocusedField("cpw")} onBlur={() => setFocusedField(null)}
+                        onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} />
+                      <div className="input-icon-wrapper"><Icon type="lock" /></div>
+                    </div>
+                  </div>
+                </div>
+
+                <label style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  color: "#6B7A8A", fontSize: "0.82rem", marginTop: 4,
+                  cursor: "pointer"
+                }}>
+                  <input type="checkbox" style={{ width: 16, height: 16, accentColor: "#D4AF37" }}
+                    checked={form.terms_accepted}
+                    onChange={(e) => setForm({ ...form, terms_accepted: e.target.checked })} />
+                  I agree to the judicial protocols and privacy policy
+                </label>
+
+                <button type="submit" className="cinematic-btn">
+                  Initialize Enrollment
+                </button>
+              </form>
+
+              <p style={{ textAlign: "center", color: "#5A6A7A", fontSize: "0.86rem", marginTop: 24 }}>
+                Already registered?{" "}
+                <Link to="/" style={{ color: "#D4AF37", fontWeight: 600, textDecoration: "none" }}>Log in here</Link>
+              </p>
             </div>
           </div>
         </div>
@@ -379,8 +495,9 @@ const JudicialSeal = () => (
 
 /* ── Shared micro-styles ── */
 const lbl = {
-  display: "block", fontSize: "0.78rem", fontWeight: 600,
-  color: "#7A8A9A", letterSpacing: "0.04em", marginBottom: 5,
+  display: "block", fontSize: "0.72rem", fontWeight: 700,
+  color: "#4A5A6A", letterSpacing: "0.1em", marginBottom: 6,
+  textTransform: "uppercase"
 };
 
 const inp = (focused) => ({
