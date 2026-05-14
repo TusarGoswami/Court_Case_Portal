@@ -43,36 +43,82 @@ function Signup() {
 
   const isFocused = (f) => focusedField === f;
 
+/* ── Judicial Seal SVG (ghosted watermark) ── */
+const JudicialSeal = () => (
+  <svg viewBox="0 0 200 200" style={{
+    position: "absolute", right: "-5%", top: "12%",
+    width: "clamp(280px, 40vw, 420px)", height: "auto",
+    opacity: 0.025, pointerEvents: "none",
+  }}>
+    <circle cx="100" cy="100" r="90" fill="none" stroke="#D4AF37" strokeWidth="1.5" />
+    <circle cx="100" cy="100" r="82" fill="none" stroke="#D4AF37" strokeWidth="0.5" />
+    <circle cx="100" cy="100" r="75" fill="none" stroke="#D4AF37" strokeWidth="0.5" />
+    <line x1="100" y1="50" x2="100" y2="120" stroke="#D4AF37" strokeWidth="1.2" />
+    <line x1="70" y1="70" x2="130" y2="70" stroke="#D4AF37" strokeWidth="1.2" />
+    <path d="M70,70 L60,95 L80,95 Z" fill="none" stroke="#D4AF37" strokeWidth="0.8" />
+    <path d="M130,70 L120,95 L140,95 Z" fill="none" stroke="#D4AF37" strokeWidth="0.8" />
+    <line x1="85" y1="120" x2="115" y2="120" stroke="#D4AF37" strokeWidth="1.2" />
+    <line x1="80" y1="126" x2="120" y2="126" stroke="#D4AF37" strokeWidth="1" />
+    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((a) => (
+      <line key={a}
+        x1={100 + 86 * Math.cos(a * Math.PI / 180)}
+        y1={100 + 86 * Math.sin(a * Math.PI / 180)}
+        x2={100 + 90 * Math.cos(a * Math.PI / 180)}
+        y2={100 + 90 * Math.sin(a * Math.PI / 180)}
+        stroke="#D4AF37" strokeWidth="1"
+      />
+    ))}
+    <text x="100" y="155" textAnchor="middle" fill="#D4AF37" fontSize="6.5"
+      fontFamily="'Cinzel', serif" letterSpacing="0.15em">E-COURT</text>
+    <text x="100" y="164" textAnchor="middle" fill="#D4AF37" fontSize="4"
+      fontFamily="'Inter', sans-serif" letterSpacing="0.1em">MANAGEMENT SYSTEM</text>
+  </svg>
+);
+
   return (
     <>
       <style>{`
+        @keyframes contentReveal {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fieldReveal {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slowZoom {
+          0%   { transform: scale(1); }
+          100% { transform: scale(1.12); }
+        }
+        @keyframes floatParticle {
+          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+          50%      { transform: translateY(-40px) translateX(12px); opacity: 0.6; }
+        }
+        @keyframes lightSweep {
+          0%   { transform: translateX(-100%) rotate(15deg); }
+          100% { transform: translateX(200%) rotate(15deg); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         @keyframes gavelStrike {
           0%   { transform: rotate(-40deg) scale(0.8); opacity: 0.5; }
           55%  { transform: rotate(8deg) scale(1.05); opacity: 1; }
           75%  { transform: rotate(-3deg) scale(1); }
           100% { transform: rotate(0deg) scale(1); opacity: 1; }
         }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes contentReveal {
-          from { opacity: 0; transform: translateY(30px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slowZoom {
-          0%   { transform: scale(1); }
-          100% { transform: scale(1.08); }
-        }
-        @keyframes floatParticle {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-          50%      { transform: translateY(-40px) translateX(12px); opacity: 0.7; }
-        }
-        @keyframes lightSweep {
-          0%   { transform: translateX(-100%) rotate(15deg); }
-          100% { transform: translateX(200%) rotate(15deg); }
-        }
         .signup-split { display: grid; grid-template-columns: 45fr 55fr; min-height: 100vh; }
+        .cinematic-input {
+           padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+           color: #fff; background: rgba(0,0,0,0.4); outline: none; transition: border-color 0.3s;
+        }
+        .cinematic-input:focus { border-color: #D4AF37; }
+        .cinematic-btn {
+           padding: 14px; background: #D4AF37; border: none; color: #080B1A; font-weight: 700;
+           letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.3s;
+        }
+        .cinematic-btn:hover { opacity: 0.9; }
         @media (max-width: 900px) {
           .signup-split { grid-template-columns: 1fr; }
           .signup-hero-panel { display: none; }
@@ -83,7 +129,7 @@ function Signup() {
       {showSplash && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9999,
-          background: "#0B132B",
+          background: "#080B1A",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           transition: "opacity 0.6s ease",
           opacity: splashFading ? 0 : 1,
@@ -95,79 +141,55 @@ function Signup() {
           }}>⚖️</div>
           <div style={{
             fontFamily: "'Cinzel', serif",
-            fontSize: "clamp(1.1rem, 3vw, 1.6rem)",
+            fontSize: "1.5rem",
             color: "#D4AF37",
             letterSpacing: "0.35em",
+            marginTop: "24px",
             opacity: 0,
-            animation: "fadeInUp 0.8s 0.55s ease forwards",
-            textShadow: "0 0 40px rgba(212,175,55,0.3)",
-            marginTop: 16,
-          }}>SILENCE PLEASE</div>
+            animation: "fadeInUp 0.8s ease forwards 0.4s",
+          }}>JUDICIAL REGISTRY</div>
         </div>
       )}
 
-      {/* ── Main Layout ── */}
-      <div className="signup-split" style={{
-        fontFamily: "'Inter', sans-serif",
-        background: "#0B132B",
-        opacity: mounted ? 1 : 0,
-        transition: "opacity 0.5s ease",
-      }}>
-
-        {/* ── Left: Hero Image Panel (45%) ── */}
+      <div className="signup-split" style={{ background: "#080B1A", overflow: "hidden" }}>
+        {/* ── Left Hero Panel ── */}
         <div className="signup-hero-panel" style={{
-          position: "relative",
-          overflow: "hidden",
-          background: "#080E1F",
+          position: "relative", overflow: "hidden",
+          background: "linear-gradient(135deg, #0A1525 0%, #050810 100%)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          borderRight: "1px solid rgba(212,175,55,0.1)",
         }}>
-          {/* Image with slow zoom */}
-          <img
-            src="/images/lady_justice_hero.png"
-            alt="Lady Justice"
-            style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover", objectPosition: "center top",
-              animation: "slowZoom 25s ease-in-out infinite alternate",
-            }}
-          />
-
-          {/* Dark cinematic overlay */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(11,19,43,0.3) 0%, rgba(11,19,43,0.65) 60%, rgba(11,19,43,0.92) 100%)",
+            backgroundImage: "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=2070')",
+            backgroundSize: "cover", backgroundPosition: "center",
+            opacity: 0.15, mixBlendMode: "overlay",
+            animation: "slowZoom 20s linear infinite alternate",
+          }} />
+          
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "radial-gradient(circle at center, transparent 0%, rgba(8,11,26,0.8) 100%)",
           }} />
 
-          {/* Light sweep effect */}
-          <div style={{
-            position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none",
-          }}>
-            <div style={{
-              position: "absolute", top: 0, left: 0,
-              width: "40%", height: "100%",
-              background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.04), transparent)",
-              animation: "lightSweep 8s ease-in-out infinite",
-            }} />
-          </div>
-
-          {/* Floating particles */}
-          {[...Array(6)].map((_, i) => (
+          {/* Ambient Particles */}
+          {[...Array(12)].map((_, i) => (
             <div key={i} style={{
               position: "absolute",
-              width: 3, height: 3, borderRadius: "50%",
-              background: "rgba(212,175,55,0.5)",
-              left: `${15 + i * 14}%`,
-              top: `${20 + (i % 3) * 25}%`,
-              animation: `floatParticle ${4 + i * 0.8}s ease-in-out ${i * 0.5}s infinite`,
-              pointerEvents: "none",
+              width: Math.random() * 3 + 1, height: Math.random() * 3 + 1,
+              background: "#D4AF37", borderRadius: "50%",
+              left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
+              opacity: 0.4,
+              animation: `floatParticle ${5 + Math.random() * 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 4}s`,
             }} />
           ))}
 
-          {/* Bottom content overlay */}
           <div style={{
             position: "absolute", bottom: 0, left: 0, right: 0,
             padding: "40px 32px",
             animation: mounted ? "contentReveal 0.8s 0.3s ease both" : "none",
+            zIndex: 3,
           }}>
             <div style={{
               fontFamily: "'Cinzel', serif",

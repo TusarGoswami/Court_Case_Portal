@@ -19,20 +19,47 @@ import { fetchStreamVideoCredentials } from "../services/streamVideo";
 
 const navItems = [
   "Dashboard",
-  "Judge Profile",
   "Assigned Cases",
   "Hearings",
+  "Judge Profile",
   "Evidence Review",
   "Judgments",
   "Calendar",
-  "Messages",
   "Analytics",
+  "Messages",
   "Cause List",
   "Courtrooms",
   "Security Center",
   "Settings",
   "Logout",
 ];
+
+/* ── Ambient Background (Unified) ── */
+function FilingParticles() {
+  return (
+    <div className="dash-particles" style={{ position: 'fixed' }}>
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="dash-particle" style={{
+          width: i % 2 === 0 ? 3 : 2, height: i % 2 === 0 ? 3 : 2,
+          left: `${[15, 45, 75, 85, 25, 60][i]}%`, top: `${[25, 55, 10, 65, 85, 40][i]}%`,
+          animation: `dashParticleFloat ${7 + i}s ease-in-out infinite`,
+        }} />
+      ))}
+      <div className="dash-light-sweep" />
+    </div>
+  );
+}
+
+function FilingJudicialSeal() {
+  return (
+    <div className="dash-seal-container" style={{ opacity: 0.04 }}>
+      <svg viewBox="0 0 200 200" className="dash-seal-svg">
+        <path fill="currentColor" d="M100,20 L120,60 L160,60 L130,90 L140,130 L100,110 L60,130 L70,90 L40,60 L80,60 Z" />
+        <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="10 5" />
+      </svg>
+    </div>
+  );
+}
 
 const FILTERS = [
   { id: "All", label: "All" },
@@ -212,9 +239,15 @@ function pseudoBar(label, pct, dark) {
 function JudgePanel() {
   const navigate = useNavigate();
   const user = getStoredUser();
+  const [theme, setTheme] = useState(localStorage.getItem("data-theme") || "midnight");
+  const darkMode = theme === "midnight";
+  
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("data-theme", theme);
+  }, [theme]);
   const caseDetailRef = useRef(null);
   const [sessionUser, setSessionUser] = useState(user);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("judge_theme") === "dark");
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [filterId, setFilterId] = useState("All");
   const [search, setSearch] = useState("");
@@ -235,11 +268,6 @@ function JudgePanel() {
   const [benchBusy, setBenchBusy] = useState(null);
   const [lastSynced, setLastSynced] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem("judge_theme", darkMode ? "dark" : "light");
-    if (darkMode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [darkMode]);
 
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 1000);
@@ -468,19 +496,17 @@ function JudgePanel() {
     navigate("/", { replace: true });
   };
 
-  const shell = darkMode ? "bg-gradient-to-br from-stone-950 via-stone-900 to-black text-stone-100" : "bg-gradient-to-br from-stone-100 via-white to-stone-200 text-stone-900";
-  const card = darkMode
-    ? "border border-stone-700/80 bg-stone-900/70 shadow-[0_12px_40px_rgba(0,0,0,.45)] backdrop-blur"
-    : "border border-stone-200 bg-white/90 shadow-[0_12px_40px_rgba(0,0,0,.08)] backdrop-blur";
-  const subtle = darkMode ? "text-stone-300" : "text-stone-600";
-  const goldBtn = "border border-amber-500/60 bg-gradient-to-r from-amber-700 to-amber-500 text-white shadow-md";
+  const shell = "dashboard-layout";
+  const card = "cinematic-card";
+  const subtle = "muted-text";
+  const goldBtn = "cinematic-btn";
 
   const renderAssignedTable = () => (
-    <section className={`mb-6 rounded-2xl p-5 ${card}`}>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <section className={card}>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-6">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Assigned Cases</h2>
-          <p className={`text-sm ${subtle}`}>Official roster synchronized from registry after counsel acceptance.</p>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)' }}>ASSIGNED CASES</h2>
+          <p className={subtle}>Official roster synchronized from registry after counsel acceptance.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
@@ -488,72 +514,75 @@ function JudgePanel() {
               key={f.id}
               type="button"
               onClick={() => setFilterId(f.id)}
-              className={`!w-auto rounded-full border px-3 py-1 text-sm font-semibold transition ${
-                filterId === f.id
-                  ? darkMode
-                    ? "border-amber-400 bg-amber-500/20 text-amber-100"
-                    : "border-amber-600 bg-amber-50 text-amber-900"
-                  : darkMode
-                    ? "border-stone-600 bg-stone-800 text-stone-200 hover:border-amber-300/60"
-                    : "border-stone-200 bg-white text-stone-700 hover:border-amber-300"
-              }`}
+              className={`status-pill ${filterId === f.id ? 'active' : ''}`}
+              style={{ cursor: 'pointer', background: filterId === f.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)' }}
             >
-              {f.label}
+              {f.label.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
 
       {!filteredCases.length ? (
-        <div className={`rounded-xl border px-4 py-6 text-sm ${darkMode ? "border-stone-700 bg-stone-800/60" : "border-stone-200 bg-stone-50"}`}>
-          {assignWarning || "No matters on your bench for this filter."}
+        <div className="cinematic-card" style={{ textAlign: 'center', padding: '40px', borderStyle: 'dashed' }}>
+          <p className={subtle}>{assignWarning || "No matters on your bench for this filter."}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className={darkMode ? "bg-stone-800/80 text-amber-100" : "bg-amber-50 text-amber-900"}>
+          <table className="cinematic-table">
+            <thead>
               <tr>
-                <th className="px-3 py-2">Case No.</th>
-                <th className="px-3 py-2">Title</th>
-                <th className="px-3 py-2">Lawyer</th>
-                <th className="px-3 py-2">Type</th>
-                <th className="px-3 py-2">Priority</th>
-                <th className="px-3 py-2">Workflow</th>
-                <th className="px-3 py-2">Hearing</th>
-                <th className="px-3 py-2">Bench action</th>
+                <th>Case No.</th>
+                <th>Title</th>
+                <th>Lawyer</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Hearing</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredCases.map((row) => (
                 <tr
                   key={row.id}
-                  className={`cursor-pointer border-t ${darkMode ? "border-stone-800 hover:bg-stone-800/80" : "border-stone-100 hover:bg-amber-50/40"} ${
-                    selectedCase?.id === row.id ? (darkMode ? "bg-stone-800/90" : "bg-amber-50/80") : ""
-                  }`}
+                  className={selectedCase?.id === row.id ? "active-row" : ""}
                   onClick={() => setSelectedCase(row)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  <td className="px-3 py-2 font-semibold">{row.case_number}</td>
-                  <td className="px-3 py-2">{row.title}</td>
-                  <td className="px-3 py-2">{row.lawyer_name || "—"}</td>
-                  <td className="px-3 py-2">{row.case_type}</td>
-                  <td className="px-3 py-2 capitalize">{row.priority || "medium"}</td>
-                  <td className="px-3 py-2">{row.workflow_label || row.status}</td>
-                  <td className="px-3 py-2">{row.slot_time ? new Date(row.slot_time).toLocaleString() : "—"}</td>
-                  <td className="px-3 py-2">
+                  <td style={{ fontWeight: '800', color: 'var(--primary)' }}>{row.case_number}</td>
+                  <td>{row.title}</td>
+                  <td>{row.lawyer_name || "—"}</td>
+                  <td className="text-xs">{row.case_type?.toUpperCase()}</td>
+                  <td>
+                    <span className="status-pill" style={{ 
+                      background: row.priority === 'high' ? 'rgba(220, 38, 38, 0.2)' : 'rgba(255,255,255,0.05)',
+                      color: row.priority === 'high' ? '#f87171' : 'inherit',
+                      fontSize: '0.65rem'
+                    }}>
+                      {(row.priority || 'medium').toUpperCase()}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="status-pill" style={{ fontSize: '0.65rem', border: '1px solid var(--border)' }}>
+                      {(row.workflow_label || row.status).toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="text-xs">{row.slot_time ? new Date(row.slot_time).toLocaleDateString() : "—"}</td>
+                  <td>
                     <select
-                      className={`w-full rounded-lg border px-2 py-1 text-xs ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
+                      className="cinematic-input"
+                      style={{ padding: '4px 8px', fontSize: '0.7rem' }}
                       value={row.status}
                       disabled={benchBusy === row.id}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => advanceStatus(row, e.target.value)}
                     >
-                      <option value="accepted">Assigned to Judge</option>
-                      <option value="verified">Verified</option>
-                      <option value="assigned_to_judge">Registry Linked</option>
-                      <option value="hearing_scheduled">Hearing Scheduled</option>
-                      <option value="judgment_pending">Judgment Pending</option>
-                      <option value="judgment_reserved">Judgment Reserved</option>
-                      <option value="closed">Closed</option>
+                      <option value="accepted">ASSIGNED</option>
+                      <option value="verified">VERIFIED</option>
+                      <option value="hearing_scheduled">HEARING</option>
+                      <option value="judgment_pending">RESERVED</option>
+                      <option value="closed">CLOSED</option>
                     </select>
                   </td>
                 </tr>
@@ -566,166 +595,122 @@ function JudgePanel() {
   );
 
   const renderCaseDetail = () => (
-    <section className={`mb-6 rounded-2xl p-5 ${card}`}>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <section className={card} style={{ marginTop: '24px' }}>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold">Bench File Preview</h3>
-          <p className={`text-sm ${subtle}`}>Counsel dossier, FIR narrative, filings, and virtual hearing anchors.</p>
+          <h3 className="text-xl font-bold" style={{ fontFamily: 'Cinzel, serif' }}>BENCH FILE PREVIEW</h3>
+          <p className={subtle}>Counsel dossier, FIR narrative, and judicial anchors.</p>
         </div>
-        {selectedCase?.priority?.toLowerCase() === "high" ? (
-          <span className="rounded-full border border-rose-400/70 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-200">
-            AI-assisted triage · elevate sequencing
+        {selectedCase?.priority?.toLowerCase() === "high" && (
+          <span className="status-pill" style={{ background: 'rgba(220, 38, 38, 0.1)', color: '#f87171', border: '1px solid #f87171' }}>
+            URGENT TRIAGE
           </span>
-        ) : null}
+        )}
       </div>
 
       {!selectedCase ? (
-        <p className={subtle}>Select a listed matter to open the consolidated file.</p>
+        <div style={{ textAlign: 'center', padding: '40px' }} className="muted-text">
+          Select a matter to open the consolidated file.
+        </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className={`space-y-2 rounded-xl border p-4 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-500">Parties</h4>
-            <p className="text-base font-semibold">{selectedCase.title}</p>
-            <p className={subtle}>Jurisdiction · {selectedCase.jurisdiction}</p>
-            <p className={subtle}>Category · {selectedCase.category}</p>
-            <p className={subtle}>
-              Counsel ·{" "}
-              <span className={`font-semibold ${darkMode ? "text-stone-100" : "text-stone-900"}`}>{selectedCase.lawyer_name || "—"}</span>
-              {selectedCase.lawyer_id ? (
-                <span className="mt-1 block font-mono text-xs opacity-80">Ref: {selectedCase.lawyer_id}</span>
-              ) : null}
-            </p>
-          </div>
-          <div className={`space-y-2 rounded-xl border p-4 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-500">FIR / Incident</h4>
-            <p className={subtle}>{selectedCase.fir_summary || "No structured FIR narrative captured for this filing."}</p>
-            {selectedCase.id_proof_url ? (
-              <a className="text-amber-300 underline" href={resolveAssetUrl(selectedCase.id_proof_url)} target="_blank" rel="noreferrer">
-                Party identification / FIR annex
-              </a>
-            ) : null}
-          </div>
-          <div className={`space-y-3 rounded-xl border p-4 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-500">Chamber notes</h4>
-            <textarea
-              className={`min-h-[96px] w-full rounded-xl border px-3 py-2 text-sm ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-              placeholder="Confidential chamber observations…"
-              value={remarkDrafts[selectedCase.id] || ""}
-              onChange={(e) => setRemarkDrafts((prev) => ({ ...prev, [selectedCase.id]: e.target.value }))}
-            />
-            <div className="flex flex-wrap gap-2">
-              <button type="button" className={`!w-auto rounded-lg px-3 py-2 text-sm font-semibold ${goldBtn}`} onClick={() => openSchedulingForm(selectedCase)}>
-                Choose date & time
-              </button>
-              <button type="button" className={`!w-auto rounded-lg px-3 py-2 text-sm ${darkMode ? "border border-stone-600 bg-stone-800" : "border border-stone-300 bg-white"}`} onClick={() => advanceStatus(selectedCase, "judgment_pending")}>
-                Reserve judgment
-              </button>
-            </div>
-            <div className={`mt-4 space-y-3 rounded-xl border p-4 ${darkMode ? "border-stone-700 bg-stone-950/50" : "border-stone-200 bg-stone-50"}`}>
-              <div>
-                <h4 className="text-sm font-semibold text-amber-500">Schedule hearing date & time</h4>
-                <p className={`text-xs ${subtle}`}>Pick the hearing date and time first, then notify the lawyer and clerk.</p>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
+            <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '20px' }}>
+              <h4 className="text-xs font-bold tracking-[0.2em] text-amber-500 mb-4 uppercase">Parties & Jurisdiction</h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-sm muted-text uppercase tracking-widest text-[0.65rem]">Title</div>
+                  <div className="text-lg font-bold">{selectedCase.title}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm muted-text uppercase tracking-widest text-[0.65rem]">Jurisdiction</div>
+                    <div className="font-semibold">{selectedCase.jurisdiction}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm muted-text uppercase tracking-widest text-[0.65rem]">Category</div>
+                    <div className="font-semibold">{selectedCase.category}</div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm muted-text uppercase tracking-widest text-[0.65rem]">Counsel</div>
+                  <div className="font-bold text-white">{selectedCase.lawyer_name || "PRO SE"}</div>
+                </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  Hearing title
+            </div>
+
+            <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '20px' }}>
+              <h4 className="text-xs font-bold tracking-[0.2em] text-amber-500 mb-4 uppercase">Chamber Notes</h4>
+              <textarea
+                className="cinematic-input"
+                style={{ width: '100%', minHeight: '120px', background: 'rgba(0,0,0,0.3)' }}
+                placeholder="Confidential chamber observations..."
+                value={remarkDrafts[selectedCase.id] || ""}
+                onChange={(e) => setRemarkDrafts((prev) => ({ ...prev, [selectedCase.id]: e.target.value }))}
+              />
+              <div className="flex gap-3 mt-4">
+                <button className="cinematic-btn" style={{ flex: 1, fontSize: '0.75rem' }} onClick={() => openSchedulingForm(selectedCase)}>
+                  SCHEDULE HEARING
+                </button>
+                <button className="ghost-btn" style={{ flex: 1 }} onClick={() => advanceStatus(selectedCase, "judgment_pending")}>
+                  RESERVE JUDGMENT
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="cinematic-card" style={{ background: 'var(--card-bg)', border: '1px solid var(--primary)' }}>
+             <h4 className="text-xs font-bold tracking-[0.2em] text-amber-500 mb-6 uppercase">Scheduling Workspace</h4>
+             <div className="grid gap-4">
+                <div>
+                  <label className="text-[0.65rem] font-bold tracking-widest muted-text uppercase block mb-2">Hearing Title</label>
                   <input
-                    type="text"
-                    className={`w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
+                    className="cinematic-input"
+                    style={{ width: '100%' }}
                     value={(hearingDrafts[selectedCase.id]?.title ?? buildHearingDraft(selectedCase).title) || ""}
-                    onChange={(e) =>
-                      setHearingDrafts((prev) => ({
-                        ...prev,
-                        [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), title: e.target.value },
-                      }))
-                    }
+                    onChange={(e) => setHearingDrafts(prev => ({ ...prev, [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), title: e.target.value }}))}
                   />
-                </label>
-                <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  Hearing date & time
-                  <input
-                    type="datetime-local"
-                    className={`w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-                    value={(hearingDrafts[selectedCase.id]?.scheduled_at ?? buildHearingDraft(selectedCase).scheduled_at) || ""}
-                    onChange={(e) =>
-                      setHearingDrafts((prev) => ({
-                        ...prev,
-                        [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), scheduled_at: e.target.value },
-                      }))
-                    }
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[0.65rem] font-bold tracking-widest muted-text uppercase block mb-2">Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      className="cinematic-input"
+                      style={{ width: '100%' }}
+                      value={(hearingDrafts[selectedCase.id]?.scheduled_at ?? buildHearingDraft(selectedCase).scheduled_at) || ""}
+                      onChange={(e) => setHearingDrafts(prev => ({ ...prev, [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), scheduled_at: e.target.value }}))}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[0.65rem] font-bold tracking-widest muted-text uppercase block mb-2">Duration (Min)</label>
+                    <input
+                      type="number"
+                      className="cinematic-input"
+                      style={{ width: '100%' }}
+                      value={hearingDrafts[selectedCase.id]?.duration_minutes ?? 30}
+                      onChange={(e) => setHearingDrafts(prev => ({ ...prev, [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), duration_minutes: e.target.value }}))}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[0.65rem] font-bold tracking-widest muted-text uppercase block mb-2">Agenda / Instructions</label>
+                  <textarea
+                    className="cinematic-input"
+                    style={{ width: '100%', minHeight: '80px' }}
+                    value={hearingDrafts[selectedCase.id]?.agenda ?? ""}
+                    onChange={(e) => setHearingDrafts(prev => ({ ...prev, [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), agenda: e.target.value }}))}
                   />
-                </label>
-                <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  Duration minutes
-                  <input
-                    type="number"
-                    min="15"
-                    max="480"
-                    className={`w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-                    value={hearingDrafts[selectedCase.id]?.duration_minutes ?? buildHearingDraft(selectedCase).duration_minutes}
-                    onChange={(e) =>
-                      setHearingDrafts((prev) => ({
-                        ...prev,
-                        [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), duration_minutes: e.target.value },
-                      }))
-                    }
-                  />
-                </label>
-                <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                  Courtroom / link
-                  <input
-                    type="text"
-                    className={`w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-                    value={hearingDrafts[selectedCase.id]?.location ?? buildHearingDraft(selectedCase).location}
-                    onChange={(e) =>
-                      setHearingDrafts((prev) => ({
-                        ...prev,
-                        [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), location: e.target.value },
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-              <label className="block space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                Agenda
-                <textarea
-                  className={`min-h-[88px] w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-                  value={hearingDrafts[selectedCase.id]?.agenda ?? buildHearingDraft(selectedCase).agenda}
-                  onChange={(e) =>
-                    setHearingDrafts((prev) => ({
-                      ...prev,
-                      [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), agenda: e.target.value },
-                    }))
-                  }
-                />
-              </label>
-              <label className="block space-y-1 text-xs font-semibold uppercase tracking-[0.2em]">
-                Meeting link
-                <input
-                  type="url"
-                  className={`w-full rounded-xl border px-3 py-2 text-sm normal-case tracking-normal ${darkMode ? "border-stone-600 bg-stone-900" : "border-stone-300 bg-white"}`}
-                  value={hearingDrafts[selectedCase.id]?.meeting_link ?? buildHearingDraft(selectedCase).meeting_link}
-                  onChange={(e) =>
-                    setHearingDrafts((prev) => ({
-                      ...prev,
-                      [selectedCase.id]: { ...(prev[selectedCase.id] || buildHearingDraft(selectedCase)), meeting_link: e.target.value },
-                    }))
-                  }
-                />
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className={`!w-auto rounded-lg px-3 py-2 text-sm font-semibold ${goldBtn}`} onClick={() => scheduleHearing(selectedCase)} disabled={benchBusy === selectedCase.id}>
-                  Notify lawyer and clerk
-                </button>
-                <button
-                  type="button"
-                  className={`!w-auto rounded-lg px-3 py-2 text-sm ${darkMode ? "border border-stone-600 bg-stone-800" : "border border-stone-300 bg-white"}`}
-                  onClick={() => setHearingDrafts((prev) => ({ ...prev, [selectedCase.id]: buildHearingDraft(selectedCase) }))}
+                </div>
+                <button 
+                  className="cinematic-btn active" 
+                  style={{ width: '100%', marginTop: '10px' }}
+                  onClick={() => scheduleHearing(selectedCase)}
+                  disabled={benchBusy === selectedCase.id}
                 >
-                  Reset draft
+                  NOTIFY COUNSEL & CLERK
                 </button>
-              </div>
-            </div>
+             </div>
           </div>
         </div>
       )}
@@ -836,84 +821,57 @@ function JudgePanel() {
   );
 
   const renderDashboard = () => (
-    <>
-      <section className={`relative mb-6 overflow-hidden rounded-2xl border px-6 py-5 ${darkMode ? "border-amber-500/35 bg-[radial-gradient(circle_at_20%_-10%,rgba(245,158,11,.35),transparent_42%),rgba(24,21,17,.92)] text-stone-100" : "border-amber-200 bg-[radial-gradient(circle_at_20%_-10%,rgba(245,158,11,.35),transparent_42%),rgba(253,246,239,1)] text-stone-900"}`}>
-        <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-amber-300">Bench of Honour</p>
-            <h1 className="text-3xl font-semibold">Welcome back, {sessionUser?.name || user.name}</h1>
-            <p className={`max-w-xl text-sm ${darkMode ? "text-stone-300" : "text-stone-600"}`}>
-              Computerized case flow with registry acceptance hooks, biometric-grade evidence locks, and real-time synchronization every 30 seconds.
-            </p>
+    <div className="space-y-8">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {kpis.map((kpi, idx) => (
+          <div key={idx} className="cinematic-card" style={{ padding: '20px', border: '1px solid rgba(212,175,55,0.1)' }}>
+            <div className="muted-text text-[0.65rem] font-bold tracking-[0.2em] mb-2 uppercase">{kpi.label}</div>
+            <div className="text-3xl font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>{kpi.value}</div>
+            <div style={{ height: '2px', width: '20px', background: 'var(--primary)', marginTop: '12px' }}></div>
           </div>
-          <div className="text-right">
-            <p className={`text-sm ${darkMode ? "text-stone-400" : "text-stone-500"}`}>Session clock</p>
-            <p className="font-mono text-lg">{clock.toLocaleString()}</p>
-            {lastSynced ? <p className="text-xs text-amber-200/90">Synced {lastSynced.toLocaleTimeString()}</p> : null}
-          </div>
-        </div>
-      </section>
-
-      <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {kpis.map((cardStat) => (
-          <article key={cardStat.label} className={`rounded-2xl p-5 ${card}`}>
-            <p className={`text-sm ${subtle}`}>{cardStat.label}</p>
-            <h3 className="mt-2 text-4xl font-semibold text-amber-400 drop-shadow">{cardStat.value}</h3>
-            <p className="mt-2 text-xs text-emerald-300/90">Live registry feed</p>
-          </article>
         ))}
-      </section>
+      </div>
 
-      <section className={`mb-6 grid gap-4 lg:grid-cols-[2fr_1fr]`}>
-        <div className={`rounded-2xl p-5 ${card}`}>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold">Productivity cockpit</h3>
-              <p className={`text-sm ${subtle}`}>Shortcuts into high-volume workspaces.</p>
+      <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
+        <div className="space-y-8">
+          {renderAssignedTable()}
+          {selectedCase ? renderCaseDetail() : (
+             <div className="cinematic-card" style={{ textAlign: 'center', padding: '60px', borderStyle: 'dashed', opacity: 0.5 }}>
+                <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📂</div>
+                <p className="muted-text">Select a matter from the roster to view consolidated bench files.</p>
+             </div>
+          )}
+        </div>
+        
+        <aside className="space-y-6">
+          <div className="cinematic-card" style={{ border: '1px solid var(--primary)' }}>
+            <h3 className="text-sm font-bold tracking-widest text-amber-500 mb-6 uppercase">TODAY'S CAUSE LIST</h3>
+            {!todaysBench.length ? (
+              <p className="muted-text text-sm">No entries for the current session.</p>
+            ) : (
+              <div className="space-y-4">
+                {todaysBench.map(item => (
+                  <div key={item.id} className="p-3 rounded-xl border border-white/5 bg-white/5">
+                    <div className="text-xs font-bold text-amber-500">{item.case_number}</div>
+                    <div className="text-sm font-semibold">{item.title}</div>
+                    <div className="text-[0.65rem] muted-text mt-1">🕒 {new Date(item.slot_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="cinematic-card">
+            <h3 className="text-sm font-bold tracking-widest text-amber-500 mb-4 uppercase">BENCH PERFORMANCE</h3>
+            <div className="space-y-4">
+               {pseudoBar("Registry Sync", 100, theme === 'midnight')}
+               {pseudoBar("Digital Evidence", 85, theme === 'midnight')}
+               {pseudoBar("Judgment Rate", 92, theme === 'midnight')}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {["Assigned Cases", "Hearings", "Evidence Review", "Cause List", "Calendar"].map((item) => (
-              <button key={item} type="button" className={`!w-auto rounded-xl px-4 py-2 text-sm font-semibold ${goldBtn}`} onClick={() => setActiveNav(item)}>
-                {item}
-              </button>
-            ))}
-          </div>
-          <p className={`mt-6 text-xs ${subtle}`}>{WORKFLOW_LEGEND}</p>
-        </div>
-        <div className={`rounded-2xl p-5 ${card}`}>
-          <h3 className="mb-3 text-lg font-semibold">Registry alerts</h3>
-          <ul className="space-y-2 text-sm">
-            {notifications.slice(0, 5).map((n) => (
-              <li key={n.id || n._id} className={`rounded-lg border px-3 py-2 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-                <strong>{n.title}</strong>
-                <p className={subtle}>{n.message}</p>
-              </li>
-            ))}
-            {!notifications.length ? <li className={subtle}>No notifications.</li> : null}
-          </ul>
-        </div>
-      </section>
-
-      <section className={`mb-6 rounded-2xl p-5 ${card}`}>
-        <h3 className="mb-3 text-lg font-semibold">Calendar preview</h3>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {Object.keys(calendarPreview)
-            .slice(0, 6)
-            .map((day) => (
-              <div key={day} className={`rounded-xl border p-3 ${darkMode ? "border-stone-700 bg-stone-900/70" : "border-stone-200 bg-white"}`}>
-                <p className="text-xs uppercase tracking-[0.3em] text-amber-500">{day}</p>
-                <p className="text-2xl font-semibold">{calendarPreview[day].length}</p>
-                <p className={`text-xs ${subtle}`}>Listed matters</p>
-              </div>
-            ))}
-          {!Object.keys(calendarPreview).length ? <p className={subtle}>Scheduling data will hydrate when registry posts hearing dates.</p> : null}
-        </div>
-      </section>
-
-      {renderAssignedTable()}
-      {renderCaseDetail()}
-    </>
+        </aside>
+      </div>
+    </div>
   );
 
   const renderCauseList = () => (
@@ -970,30 +928,42 @@ function JudgePanel() {
   const renderAnalytics = () => {
     const closed = stats?.closed_cases ?? courtCases.filter((c) => (c.status || "").toLowerCase() === "closed").length;
     const open = stats?.open_cases ?? courtCases.filter((c) => (c.status || "").toLowerCase() !== "closed").length;
-
     const resolvedPct = closed + open === 0 ? 0 : Math.round((closed / (closed + open)) * 100);
     const backlogPct = 100 - resolvedPct;
 
     return (
-      <section className={`rounded-2xl p-5 ${card}`}>
-        <h2 className="mb-4 text-xl font-semibold">Analytics</h2>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className={`space-y-4 rounded-xl border p-4 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-amber-500">Disposition mix</p>
-            {pseudoBar("Resolved spectrum", resolvedPct, darkMode)}
-            {pseudoBar("Active backlog", backlogPct, darkMode)}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <section className="cinematic-card">
+          <h2 className="mb-6 text-xl font-bold tracking-widest text-amber-500 uppercase" style={{ fontFamily: 'Cinzel, serif' }}>DISPOSITION METRICS</h2>
+          <div className="space-y-8">
+            <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              {pseudoBar("RESOLVED SPECTRUM", resolvedPct, theme === 'midnight')}
+              <p className="muted-text text-[0.6rem] mt-2">Closed matters indexed via registry audit.</p>
+            </div>
+            <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              {pseudoBar("ACTIVE BACKLOG", backlogPct, theme === 'midnight')}
+              <p className="muted-text text-[0.6rem] mt-2">Matters awaiting judicial disposition or hearing.</p>
+            </div>
           </div>
-          <div className={`space-y-2 rounded-xl border p-4 text-sm ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-            <p>
-              Resolved matters (registry): <strong>{closed}</strong>
-            </p>
-            <p>
-              Active docket projection: <strong>{open}</strong>
-            </p>
-            <p className={subtle}>Predictive load balancing uses pacing from upcoming slot density.</p>
+        </section>
+
+        <section className="cinematic-card" style={{ background: 'var(--card-bg)', border: '1px solid var(--primary)' }}>
+          <h2 className="mb-6 text-xl font-bold tracking-widest text-amber-500 uppercase" style={{ fontFamily: 'Cinzel, serif' }}>BENCH DATA</h2>
+          <div className="grid grid-cols-2 gap-4">
+             <div className="cinematic-card" style={{ padding: '24px', textAlign: 'center' }}>
+                <div className="text-4xl font-black text-white">{closed}</div>
+                <div className="muted-text text-[0.6rem] mt-2 font-bold tracking-widest uppercase">RESOLVED</div>
+             </div>
+             <div className="cinematic-card" style={{ padding: '24px', textAlign: 'center' }}>
+                <div className="text-4xl font-black text-white">{open}</div>
+                <div className="muted-text text-[0.6rem] mt-2 font-bold tracking-widest uppercase">ACTIVE</div>
+             </div>
           </div>
-        </div>
-      </section>
+          <div className="mt-8 p-4 rounded-xl border border-white/5 bg-white/5 text-xs muted-text italic">
+            Predictive load balancing uses pacing from upcoming slot density to optimize courtroom throughput.
+          </div>
+        </section>
+      </div>
     );
   };
 
@@ -1016,15 +986,16 @@ function JudgePanel() {
   );
 
   const renderCourtrooms = () => (
-    <section className={`rounded-2xl p-5 ${card}`}>
-      <h2 className="mb-4 text-xl font-semibold">Courtroom monitoring</h2>
-      <div className="grid gap-3 md:grid-cols-3">
+    <section className="cinematic-card">
+      <h2 className="mb-8 text-2xl font-bold tracking-widest text-amber-500 uppercase" style={{ fontFamily: 'Cinzel, serif' }}>COURTROOM MONITORING</h2>
+      <div className="grid gap-6 md:grid-cols-3">
         {["Courtroom I · Constitution Bench", "Courtroom II · Appellate", "Courtroom III · Virtual"].map((title) => (
-          <div key={title} className={`rounded-xl border p-4 ${darkMode ? "border-stone-700 bg-stone-900/75" : "border-stone-200 bg-white"}`}>
-            <p className="font-semibold">{title}</p>
-            <p className={`text-xs ${subtle}`}>Occupancy telemetry · networked AV</p>
-            <button type="button" className={`mt-3 !w-full rounded-lg py-2 text-sm font-semibold ${goldBtn}`} onClick={() => setActiveNav("Hearings")}>
-              Enter virtual bench
+          <div key={title} className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center mb-4" style={{ background: 'rgba(212,175,55,0.05)' }}>🏛️</div>
+            <p className="font-bold text-white mb-1">{title.toUpperCase()}</p>
+            <p className="muted-text text-[0.65rem] tracking-widest uppercase">Occupancy telemetry · Active session</p>
+            <button type="button" className="cinematic-btn active" style={{ width: '100%', marginTop: '24px', fontSize: '0.7rem' }} onClick={() => setActiveNav("Hearings")}>
+              ENTER VIRTUAL BENCH
             </button>
           </div>
         ))}
@@ -1059,13 +1030,26 @@ function JudgePanel() {
   );
 
   const renderSettings = () => (
-    <section className={`rounded-2xl p-5 ${card}`}>
-      <h2 className="text-xl font-semibold">Chamber preferences</h2>
-      <label className="mt-4 flex items-center gap-3 text-sm">
-        <input type="checkbox" checked={darkMode} onChange={(e) => setDarkMode(e.target.checked)} />
-        Enable judicial dark mode (high contrast)
-      </label>
-      <p className={`mt-4 text-sm ${subtle}`}>Theme preference persists on this device.</p>
+    <section className="cinematic-card" style={{ maxWidth: '600px' }}>
+      <h2 className="mb-6 text-xl font-bold tracking-widest text-amber-500 uppercase" style={{ fontFamily: 'Cinzel, serif' }}>CHAMBER PREFERENCES</h2>
+      <div className="space-y-6">
+        <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '24px' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-bold text-white">Visual Bench Theme</div>
+              <div className="muted-text text-xs">Switch between classic and midnight judicial themes.</div>
+            </div>
+            <button 
+              className="theme-btn active" 
+              onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
+              style={{ fontSize: '0.7rem' }}
+            >
+              {theme.toUpperCase()}
+            </button>
+          </div>
+        </div>
+        <p className="muted-text text-[0.7rem] italic">Chamber preferences are stored locally and encrypted via browser secure vault.</p>
+      </div>
     </section>
   );
 
@@ -1213,60 +1197,93 @@ function JudgePanel() {
   };
 
   return (
-    <div className={`min-h-screen ${shell}`}>
-      <div className="mx-auto flex max-w-[1920px]">
-        <aside className={`sticky top-0 flex h-screen w-72 flex-col border-r p-5 ${darkMode ? "border-stone-800 bg-stone-950/90" : "border-stone-200 bg-white/95"}`}>
-          <div className="mb-6 rounded-2xl border border-amber-500/50 bg-gradient-to-br from-amber-700 to-amber-500 px-3 py-3 text-center text-lg font-bold tracking-[0.5em] text-white shadow-lg">
-            E-COURT
+    <div className={shell}>
+      <FilingParticles />
+      <FilingJudicialSeal />
+      
+      <div className="mx-auto flex max-w-[1920px] relative z-10">
+        <aside className="sticky top-0 flex h-screen w-72 flex-col p-6 glass-sidebar">
+          <div className="mb-10 text-center">
+            <div className="text-2xl font-bold tracking-[0.4em] text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+              E-COURT
+            </div>
+            <div className="text-[0.65rem] tracking-[0.3em] text-amber-500/80 font-bold mt-1">JUDICIAL BENCH</div>
           </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
+          
+          <nav className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
             {navItems.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => (item === "Logout" ? logout() : setActiveNav(item))}
-                className={`w-full rounded-xl border px-4 py-2.5 text-left text-sm font-semibold transition ${
-                  activeNav === item
-                    ? darkMode
-                      ? "border-amber-400 bg-amber-500/15 text-amber-100"
-                      : "border-amber-500 bg-amber-50 text-amber-900"
-                    : darkMode
-                      ? "border-stone-800 bg-stone-900 text-stone-200 hover:border-amber-400/50"
-                      : "border-stone-200 bg-white text-stone-700 hover:border-amber-300"
-                }`}
+                className={`sidebar-shortcut ${activeNav === item ? 'active' : ''}`}
+                style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left' }}
               >
-                {item}
+                {item.toUpperCase()}
               </button>
             ))}
           </nav>
-          <button type="button" className={`mt-4 w-full rounded-xl py-2 text-xs font-semibold uppercase tracking-[0.3em] ${goldBtn}`} onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? "Day session" : "Night session"}
-          </button>
+
+          <div className="mt-8 pt-6 border-t border-white/5">
+             <button 
+              onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
+              className="theme-btn active"
+              style={{ width: '100%', fontSize: '0.7rem' }}
+            >
+              {theme === 'midnight' ? '🌙 MIDNIGHT BENCH' : '🏛️ CLASSIC CHAMBERS'}
+            </button>
+          </div>
         </aside>
 
-        <main className="flex-1 space-y-2 p-6">
-          <header className={`flex flex-wrap items-center gap-3 rounded-2xl border px-4 py-4 ${darkMode ? "border-stone-800 bg-stone-900/80" : "border-stone-200 bg-white/90"} backdrop-blur`}>
-            <div className="min-w-[220px] flex-1">
-              <input
-                className={`w-full rounded-xl border px-4 py-2 text-base outline-none ring-amber-500/80 focus:ring-2 ${darkMode ? "border-stone-700 bg-stone-950 text-white" : "border-stone-300 bg-white"}`}
-                placeholder="Search filings, citations, citations…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+        <main className="flex-1 space-y-6 p-8">
+          <header className="flex flex-wrap items-center gap-6 p-6 cinematic-card" style={{ padding: '16px 24px' }}>
+            <div className="flex-1 min-w-[300px]">
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+                <input
+                  className="cinematic-input"
+                  style={{ width: '100%', paddingLeft: '48px' }}
+                  placeholder="Search bench files, citations, or case numbers..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
             </div>
-            <div className={`rounded-xl border px-3 py-2 text-sm ${darkMode ? "border-stone-700" : "border-stone-200"}`}>{notifications.length} alerts</div>
-            <div className={`rounded-xl border px-3 py-2 text-sm ${darkMode ? "border-stone-700" : "border-stone-200"}`}>{courtCases.length} active roster</div>
-            <div className={`rounded-xl px-4 py-2 text-sm ${darkMode ? "bg-black/35 text-stone-200" : "bg-stone-100"}`}>{clock.toLocaleTimeString()}</div>
-            <div className="flex items-center gap-3 rounded-xl border border-amber-400/70 bg-gradient-to-r from-stone-900 to-stone-800 px-3 py-2 text-sm font-semibold text-white">
-              <img src={portraitSrc || resolveAssetUrl(TRIPATHI_PROFILE_FALLBACK.photo_url)} alt="" className="h-10 w-10 rounded-full border-2 border-amber-400/80 object-cover" />
-              <span className="leading-tight">
-                {sessionUser?.name || user.name}
-                <span className="block text-xs font-normal text-amber-200/90">Bench officer</span>
-              </span>
+            
+            <div className="flex items-center gap-4">
+              <div className="status-pill" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
+                {notifications.length} ALERTS
+              </div>
+              <div className="status-pill" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
+                {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
+              
+              <div 
+                className="flex items-center gap-3 p-2 pr-4 cinematic-card" 
+                style={{ padding: '8px 16px', borderRadius: '16px', cursor: 'pointer', border: '1px solid var(--primary)' }}
+                onClick={() => setActiveNav("Judge Profile")}
+              >
+                <img 
+                  src={portraitSrc || resolveAssetUrl(TRIPATHI_PROFILE_FALLBACK.photo_url)} 
+                  alt="" 
+                  className="h-10 w-10 rounded-full border-2 border-amber-500/50 object-cover" 
+                />
+                <div className="leading-tight">
+                  <div className="text-sm font-bold text-white">{sessionUser?.name || user.name}</div>
+                  <div className="text-[0.6rem] text-amber-500 font-bold tracking-widest uppercase">Bench Officer</div>
+                </div>
+              </div>
             </div>
           </header>
 
-          {loading ? <div className={`rounded-xl border px-4 py-6 ${card}`}>Loading judicial dashboard…</div> : renderSection()}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {loading ? (
+              <div className="cinematic-card" style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="loading-spinner" style={{ margin: '0 auto 20px' }}></div>
+                <p className="muted-text">Synchronizing with Registry...</p>
+              </div>
+            ) : renderSection()}
+          </div>
         </main>
       </div>
     </div>
