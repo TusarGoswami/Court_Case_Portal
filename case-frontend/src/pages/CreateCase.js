@@ -19,7 +19,7 @@ const PARTICLES = [
 
 function FilingParticles() {
   return (
-    <div className="dash-particles" style={{ fixed: true }}>
+    <div className="dash-particles" style={{ position: 'fixed' }}>
       {PARTICLES.map((p, i) => (
         <div key={i} className="dash-particle" style={{
           width: p.s, height: p.s,
