@@ -59,7 +59,7 @@ export default function ProfileSettings() {
   };
 
   return (
-    <div className="dashboard-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="dashboard-layout" style={{ justifyContent: 'center', alignItems: 'center' }}>
       <FilingParticles />
       
       <div className="panel" style={{ width: 'min(500px, 95vw)', background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(16px)', border: '1px solid var(--border)', padding: '32px', position: 'relative', zIndex: 10 }}>

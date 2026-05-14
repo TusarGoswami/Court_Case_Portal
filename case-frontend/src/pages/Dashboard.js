@@ -613,38 +613,52 @@ function Dashboard() {
       <aside className="dashboard-sidebar">
         <div className="dashboard-logo">E-COURT</div>
 
-        {/* Search shortcut */}
         <button className="sidebar-shortcut" onClick={() => setCmdPaletteOpen(true)}>
-          🔍 Quick Search <kbd>Ctrl+K</kbd>
+          <span>🔍 Quick Search <kbd>Ctrl+K</kbd></span>
         </button>
 
         <nav className="dashboard-menu">
           {user?.role === "public_user" ? (
             <button className="menu-item" onClick={() => navigate("/create-case")}>
-              Create Case
+              <i>➕</i>
+              <span className="menu-item-text">Create Case</span>
             </button>
           ) : null}
-          {["Dashboard", "Assigned Cases", ...(user?.role !== "public_user" ? ["Case Requests", "Clients", "Schedule / Hearings", "Documents"] : []), "Messages", "Profile Settings"].map((item) => (
+          {[
+            { label: "Dashboard", icon: "🏠" },
+            { label: "Assigned Cases", icon: "⚖️" },
+            ...(user?.role !== "public_user" ? [
+              { label: "Case Requests", icon: "📥" },
+              { label: "Clients", icon: "👥" },
+              { label: "Schedule / Hearings", icon: "📅" },
+              { label: "Documents", icon: "📄" }
+            ] : []),
+            { label: "Messages", icon: "💬" },
+            { label: "Profile Settings", icon: "⚙️" }
+          ].map((item) => (
             <button
-              key={item}
-              className={`menu-item ${activeMenu === item ? "active" : ""}`}
+              key={item.label}
+              className={`menu-item ${activeMenu === item.label ? "active" : ""}`}
               onClick={() => {
-                if (item === "Profile Settings") navigate("/profile");
-                else setActiveMenu(item);
+                if (item.label === "Profile Settings") navigate("/profile");
+                else setActiveMenu(item.label);
               }}
             >
-              {item}
+              <i>{item.icon}</i>
+              <span className="menu-item-text">{item.label}</span>
             </button>
           ))}
         </nav>
 
-        {/* Theme Switcher */}
         <div className="theme-switcher">
-          <button className={`theme-btn ${theme === "midnight" ? "active" : ""}`} onClick={() => setTheme("midnight")}>🌙 Midnight</button>
-          <button className={`theme-btn ${theme === "chambers" ? "active" : ""}`} onClick={() => setTheme("chambers")}>🌿 Chambers</button>
+          <button className={`theme-btn ${theme === "midnight" ? "active" : ""}`} onClick={() => setTheme("midnight")}>🌙</button>
+          <button className={`theme-btn ${theme === "chambers" ? "active" : ""}`} onClick={() => setTheme("chambers")}>🌿</button>
         </div>
 
-        <button className="menu-item logout" onClick={handleLogout}>Logout</button>
+        <button className="menu-item logout" onClick={handleLogout}>
+          <i>🚪</i>
+          <span className="menu-item-text">Logout</span>
+        </button>
       </aside>
 
       <main className="dashboard-main">

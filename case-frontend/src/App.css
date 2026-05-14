@@ -21,6 +21,42 @@
   --seal-color: #D4AF37;
   --parchment-bg: linear-gradient(135deg, rgba(30,37,65,0.6) 0%, rgba(20,28,50,0.8) 100%);
   --parchment-text: #C8B88A;
+  --sidebar-w: 260px;
+  --header-h: 70px;
+}
+
+/* ── Responsive Foundation ── */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 80px; }
+  .dashboard-logo, .sidebar-shortcut span, .menu-item-text { display: none; }
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout { display: block !important; }
+  .dashboard-sidebar { 
+    position: fixed !important; bottom: 0 !important; left: 0 !important; 
+    right: 0 !important; top: auto !important; width: 100% !important; 
+    height: 65px !important; flex-direction: row !important; 
+    z-index: 1000 !important; padding: 0 10px !important; 
+    border-right: none !important; border-top: 1px solid var(--border) !important;
+    background: rgba(11,19,43,0.95) !important; backdrop-filter: blur(24px) !important;
+    overflow: visible !important;
+  }
+  .dashboard-logo, .sidebar-divider, .sidebar-footer, .sidebar-shortcut, .theme-switcher, .logout { display: none !important; }
+  .dashboard-menu { display: flex !important; flex-direction: row !important; width: 100% !important; justify-content: space-around !important; margin: 0 !important; gap: 0 !important; }
+  .menu-item { flex-direction: column !important; padding: 8px !important; font-size: 0.62rem !important; gap: 4px !important; width: auto !important; text-align: center !important; background: none !important; border: none !important; }
+  .menu-item i { font-size: 1.25rem !important; margin: 0 !important; display: block !important; }
+  
+  .dashboard-main { margin-left: 0 !important; padding: 20px !important; padding-bottom: 90px !important; }
+  .grid, .cards, .kpi-grid, .dashboard-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  .panel { padding: 16px !important; border-radius: 12px !important; }
+  .progress-ribbon { flex-wrap: wrap !important; gap: 8px !important; }
+  .ribbon-stage { padding: 8px 12px !important; font-size: 0.7rem !important; }
 }
 
 [data-theme="chambers"] {

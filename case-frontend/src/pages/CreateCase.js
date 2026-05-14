@@ -383,60 +383,129 @@ export default function CreateCase() {
         )}
 
         {step === 3 && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
-            <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)' }}>Schedule Consultation</h3>
-                <button className="ghost-btn" onClick={() => setStep(2)}>CHANGE LAWYER</button>
+        {step === 3 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+              gap: 24,
+              alignItems: 'start'
+            }}>
+              {/* Main Calendar Panel */}
+              <div className="panel" style={{ 
+                background: 'rgba(15, 23, 42, 0.4)', 
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(212,175,55,0.1)', 
+                padding: 'clamp(20px, 3vw, 32px)',
+                borderRadius: '24px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: 32 }}>
+                  <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', margin: 0 }}>Schedule Consultation</h3>
+                  <button className="ghost-btn" style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(212,175,55,0.05)' }} onClick={() => setStep(2)}>CHANGE LAWYER</button>
+                </div>
+  
+                <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16, marginBottom: 32 }}>
+                  {groupedDates.map((d, idx) => {
+                    const active = d.date === selectedDate;
+                    return (
+                      <button key={d.date} className="kpi-card" 
+                        style={{ 
+                          minWidth: 140, padding: 16, cursor: 'pointer', 
+                          border: active ? '2px solid var(--primary)' : '1px solid var(--border)', 
+                          background: active ? 'rgba(212,175,55,0.1)' : 'rgba(0,0,0,0.2)',
+                          borderRadius: 16, transition: 'all 0.3s ease'
+                        }} 
+                        onClick={() => setSelectedDate(d.date)}>
+                        <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : d.date}</p>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{d.items.length} Slots</p>
+                      </button>
+                    );
+                  })}
+                </div>
+  
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 12 }}>
+                  {(groupedDates.find(d => d.date === selectedDate)?.items || []).map(slot => {
+                    const active = selectedSlot?.slot_time === slot.slot_time;
+                    return (
+                      <button key={slot.slot_time} disabled={slot.is_booked} 
+                        onClick={() => reserveSlot(slot)} 
+                        className="theme-btn" 
+                        style={{ 
+                          padding: '14px', borderRadius: 12,
+                          border: active ? '1px solid var(--primary)' : '1px solid var(--border)', 
+                          background: active ? 'var(--primary)' : slot.is_booked ? 'transparent' : 'rgba(255,255,255,0.03)', 
+                          color: active ? '#000' : slot.is_booked ? 'rgba(255,255,255,0.2)' : 'var(--text)', 
+                          opacity: slot.is_booked ? 0.4 : 1,
+                          fontWeight: active ? 700 : 400
+                        }}>
+                        {slot.time}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-
-              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '32px' }}>
-                {groupedDates.map((d, idx) => {
-                  const active = d.date === selectedDate;
-                  return (
-                    <button key={d.date} className="kpi-card" style={{ minWidth: '160px', padding: '16px', cursor: 'pointer', border: active ? '2px solid var(--primary)' : '1px solid var(--border)', background: active ? 'rgba(212,175,55,0.05)' : 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedDate(d.date)}>
-                      <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : d.date}</p>
-                      <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{d.items.length} Slots</p>
+  
+              {/* Summary & Action Sidebar */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div className="panel" style={{ 
+                  background: 'rgba(15, 23, 42, 0.6)', 
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(212,175,55,0.15)', 
+                  padding: 24, borderRadius: 24
+                }}>
+                  <h4 style={{ fontFamily: 'Cinzel, serif', color: '#fff', marginBottom: 20, fontSize: '1.1rem' }}>Filing Summary</h4>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: 16, borderRadius: 16 }}>
+                      <p style={{ fontSize: '0.65rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Selected Advocate</p>
+                      <p style={{ fontWeight: 700, fontSize: '1rem', marginTop: 4 }}>{selectedLawyer?.name}</p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--primary)', marginTop: 2 }}>{selectedLawyer?.role}</p>
+                    </div>
+  
+                    {bookingId ? (
+                      <div style={{ 
+                        background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', 
+                        padding: 16, borderRadius: 16 
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                          <span style={{ fontSize: '1rem' }}>✅</span>
+                          <p style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase' }}>Time Slot Secured</p>
+                        </div>
+                        <p style={{ fontWeight: 700, fontSize: '1rem' }}>{selectedSlot?.date}</p>
+                        <p style={{ fontWeight: 700, fontSize: '1rem', color: '#4ade80' }}>at {selectedSlot?.time}</p>
+                      </div>
+                    ) : (
+                      <div style={{ 
+                        background: 'rgba(212,175,55,0.05)', border: '1px dashed rgba(212,175,55,0.2)', 
+                        padding: 20, borderRadius: 16, textAlign: 'center' 
+                      }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Select an available time slot to finalize your judicial submission.</p>
+                      </div>
+                    )}
+  
+                    <button 
+                      className="theme-btn active" 
+                      disabled={submitting || !bookingId} 
+                      style={{ 
+                        width: '100%', padding: '18px', marginTop: 8, 
+                        fontSize: '1rem', fontWeight: 700, 
+                        boxShadow: bookingId ? '0 10px 30px rgba(212,175,55,0.3)' : 'none'
+                      }} 
+                      onClick={submitCase}
+                    >
+                      {submitting ? "VERIFYING..." : "CONFIRM & FILE CASE →"}
                     </button>
-                  );
-                })}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
-                {(groupedDates.find(d => d.date === selectedDate)?.items || []).map(slot => {
-                  const active = selectedSlot?.slot_time === slot.slot_time;
-                  return (
-                    <button key={slot.slot_time} disabled={slot.is_booked} onClick={() => reserveSlot(slot)} className="theme-btn" style={{ padding: '12px', border: active ? '1px solid var(--primary)' : '1px solid var(--border)', background: active ? 'var(--primary)' : slot.is_booked ? 'transparent' : 'rgba(255,255,255,0.03)', color: active ? 'var(--bg)' : slot.is_booked ? 'rgba(255,255,255,0.2)' : 'var(--text)', opacity: slot.is_booked ? 0.4 : 1 }}>
-                      {slot.time}
-                    </button>
-                  );
-                })}
+                    
+                    <p style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'center', marginTop: 8 }}>
+                      By clicking confirm, you electronically sign and submit this case to the {form.jurisdiction} jurisdiction.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <aside>
-              <div className="parchment-panel" style={{ padding: '24px' }}>
-                <h4 style={{ fontFamily: 'Cinzel, serif', marginBottom: '20px' }}>Review & Submit</h4>
-                <div className="activity-item" style={{ background: 'rgba(0,0,0,0.1)', display: 'block', padding: '16px', marginBottom: '16px' }}>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>SELECTED EXPERT</p>
-                  <p style={{ fontWeight: 'bold' }}>{selectedLawyer?.name}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>{selectedLawyer?.role}</p>
-                </div>
-                {bookingId ? (
-                  <div className="activity-item" style={{ background: 'rgba(74,222,128,0.05)', borderColor: 'rgba(74,222,128,0.2)', display: 'block', padding: '16px' }}>
-                    <p style={{ fontSize: '0.7rem', color: '#4ade80' }}>TIME SLOT SECURED</p>
-                    <p style={{ fontWeight: 'bold' }}>{selectedSlot?.date}</p>
-                    <p style={{ fontWeight: 'bold' }}>{selectedSlot?.time}</p>
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)', textAlign: 'center', padding: '20px' }}>Select an available time slot to finalize submission.</p>
-                )}
-                <button className="theme-btn active" disabled={submitting || !bookingId} style={{ width: '100%', padding: '16px', marginTop: '24px' }} onClick={submitCase}>
-                  {submitting ? "SUBMITTING..." : "CONFIRM & FILE CASE"}
-                </button>
-              </div>
-            </aside>
           </div>
+        )}
         )}
       </div>
     </div>
