@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "../App.css";
 import api from "../services/api";
 import { getDefaultRouteForRole, saveSession } from "../services/auth";
@@ -112,7 +113,7 @@ const MagneticBtn = ({ children, onClick, type = "button", style: extraStyle }) 
     const rect = btn.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translate(${x * 0.18}px, ${y * 0.18}px)`;
+    btn.style.transform = "translate(0,0)";
   };
   const handleLeave = () => {
     if (ref.current) ref.current.style.transform = "translate(0,0)";
@@ -134,7 +135,7 @@ const useScramble = (text, trigger) => {
   const [display, setDisplay] = useState(text);
   useEffect(() => {
     if (!trigger) return;
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let iter = 0;
     const interval = setInterval(() => {
       setDisplay(text.split("").map((c, i) =>
@@ -142,7 +143,7 @@ const useScramble = (text, trigger) => {
       ).join(""));
       iter++;
       if (iter > text.length) clearInterval(interval);
-    }, 35);
+    }, 100);
     return () => clearInterval(interval);
   }, [trigger, text]);
   return display;
@@ -156,7 +157,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const scrambledTitle = useScramble("SECURE LOGIN", titleVisible);
+  const scrambledTitle = useScramble("JUDICIAL ACCESS", titleVisible);
 
   useEffect(() => {
     const t1 = setTimeout(() => setMounted(true), 80);
@@ -202,8 +203,7 @@ function Login() {
         }
         @keyframes orbFloat {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(30px, -20px) scale(1.05); }
-          66%       { transform: translate(-20px, 15px) scale(0.97); }
+          50%       { transform: translate(10px, -8px) scale(1.02); }
         }
         @keyframes shimmerSlide {
           0%   { left: -60%; }
@@ -553,12 +553,12 @@ function Login() {
                         style={{
                           position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
                           background: "none", border: "none", cursor: "pointer",
-                          color: "rgba(212,175,55,0.5)", fontSize: "0.9rem", 
-                          width: "34px", height: "34px", display: "flex", 
+                          color: "rgba(212,175,55,0.5)", fontSize: "0.9rem",
+                          width: "34px", height: "34px", display: "flex",
                           alignItems: "center", justifyContent: "center",
                           zIndex: 5, padding: 0
                         }}>
-                        {showPassword ? "👁" : "🙈"}
+                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>
                     </div>
                   </div>

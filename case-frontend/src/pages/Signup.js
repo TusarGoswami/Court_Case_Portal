@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "../App.css";
 import api from "../services/api";
 import { getDefaultRouteForRole, saveSession } from "../services/auth";
@@ -607,7 +608,7 @@ function Signup() {
                                 alignItems: "center", justifyContent: "center",
                                 zIndex: 5, padding: 0
                               }}>
-                              {showPassword ? "👁" : "🙈"}
+                              {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                             </button>
                           </div>
                         </div>
