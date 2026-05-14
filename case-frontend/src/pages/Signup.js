@@ -350,7 +350,8 @@ function Signup() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", objectPosition: "center top",
-              opacity: 0.3,
+              opacity: 0.55,
+              filter: "brightness(1.15) contrast(1.05)",
               animation: "heroFloat 20s ease-in-out infinite",
             }}
           />
@@ -586,7 +587,7 @@ function Signup() {
                           <label style={lbl}>Password</label>
                           <div style={{ position: "relative" }}>
                             <input className="su-input" type={showPassword ? "text" : "password"}
-                              placeholder="••••••••" style={{ paddingRight: 42 }}
+                              placeholder="••••••••" style={{ paddingRight: 52 }}
                               value={form.password}
                               onFocus={() => setFocusedField("pw")} onBlur={() => setFocusedField(null)}
                               onChange={(e) => setForm({ ...form, password: e.target.value })} />
@@ -597,9 +598,12 @@ function Signup() {
                             </span>
                             <button type="button" onClick={() => setShowPassword(!showPassword)}
                               style={{
-                                position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                                position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
                                 background: "none", border: "none", cursor: "pointer",
-                                color: "rgba(212,175,55,0.4)", fontSize: "0.85rem", padding: "4px", lineHeight: 1,
+                                color: "rgba(212,175,55,0.5)", fontSize: "0.9rem", 
+                                width: "34px", height: "34px", display: "flex", 
+                                alignItems: "center", justifyContent: "center",
+                                zIndex: 5, padding: 0
                               }}>
                               {showPassword ? "👁" : "🙈"}
                             </button>
@@ -609,7 +613,7 @@ function Signup() {
                           <label style={lbl}>Confirm Password</label>
                           <div style={{ position: "relative" }}>
                             <input className="su-input" type={showPassword ? "text" : "password"}
-                              placeholder="••••••••"
+                              placeholder="••••••••" style={{ paddingRight: 52 }}
                               value={form.password_confirmation}
                               onFocus={() => setFocusedField("cpw")} onBlur={() => setFocusedField(null)}
                               onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} />

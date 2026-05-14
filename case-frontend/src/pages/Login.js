@@ -153,6 +153,7 @@ function Login() {
   const [focusedField, setFocusedField] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [titleVisible, setTitleVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const scrambledTitle = useScramble("SECURE LOGIN", titleVisible);
@@ -357,7 +358,8 @@ function Login() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", objectPosition: "center 30%",
-              opacity: 0.35,
+              opacity: 0.5,
+              filter: "brightness(1.1) contrast(1.02)",
               animation: mounted ? "heroImgReveal 1.8s ease both" : "none",
             }}
           />
@@ -534,8 +536,9 @@ function Login() {
                   <div style={{ animation: mounted ? "revealUp 0.5s 0.6s ease both" : "none", opacity: 0 }}>
                     <label style={lbl}>Password</label>
                     <div className="field-wrap">
-                      <input type="password" className="field-input"
+                      <input type={showPassword ? "text" : "password"} className="field-input"
                         placeholder="Enter password"
+                        style={{ paddingRight: 52 }}
                         value={form.password}
                         onFocus={() => setFocusedField("pw")}
                         onBlur={() => setFocusedField(null)}
@@ -546,6 +549,17 @@ function Login() {
                           <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7,11 V7 a5,5 0 0 1 10,0 v4" />
                         </svg>
                       </span>
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                          position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
+                          background: "none", border: "none", cursor: "pointer",
+                          color: "rgba(212,175,55,0.5)", fontSize: "0.9rem", 
+                          width: "34px", height: "34px", display: "flex", 
+                          alignItems: "center", justifyContent: "center",
+                          zIndex: 5, padding: 0
+                        }}>
+                        {showPassword ? "👁" : "🙈"}
+                      </button>
                     </div>
                   </div>
 
