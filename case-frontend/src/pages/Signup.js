@@ -254,6 +254,8 @@ function Signup() {
           position: relative; overflow: hidden;
           box-shadow: 0 4px 24px rgba(212,175,55,0.25), inset 0 1px 0 rgba(255,255,255,0.18);
           transition: transform 0.25s cubic-bezier(0.23,1,0.32,1), box-shadow 0.25s;
+          white-space: nowrap;
+          min-width: 200px;
         }
         .reg-btn::before {
           content: ''; position: absolute; top: 0; width: 40%; height: 100%; left: -40%;
