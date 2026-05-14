@@ -7,6 +7,212 @@ import { clearSession, getStoredUser } from "../services/auth";
 const API_BASE = api?.defaults?.baseURL || "http://127.0.0.1:8000/api";
 const BACKEND_BASE = API_BASE.replace(/\/api\/?$/, "");
 
+/* ── Case lifecycle stages ── */
+const CASE_STAGES = [
+  { key: "filed", icon: "📋", label: "Filed" },
+  { key: "verified", icon: "✅", label: "Verified" },
+  { key: "assigned", icon: "⚖️", label: "Assigned" },
+  { key: "hearing", icon: "🏛️", label: "Hearing" },
+  { key: "judgment", icon: "📜", label: "Judgment" },
+  { key: "closed", icon: "🔒", label: "Closed" },
+];
+
+function getStageIndex(status) {
+  const s = (status || "").toLowerCase();
+  if (s === "closed") return 5;
+  if (["judgment_pending", "judgment_reserved"].includes(s)) return 4;
+  if (s === "hearing_scheduled") return 3;
+  if (["assigned_to_judge", "accepted"].includes(s)) return 2;
+  if (s === "verified") return 1;
+  return 0;
+}
+
+/* ── Ambient Particles ── */
+const PARTICLES = [
+  { x: 12, y: 18, s: 2, d: 6, delay: 0 },
+  { x: 35, y: 45, s: 3, d: 7, delay: 1.5 },
+  { x: 58, y: 22, s: 2, d: 5.5, delay: 0.8 },
+  { x: 76, y: 55, s: 4, d: 8, delay: 2 },
+  { x: 88, y: 30, s: 2, d: 6.5, delay: 0.3 },
+  { x: 25, y: 70, s: 3, d: 7.5, delay: 1 },
+  { x: 65, y: 75, s: 2, d: 6, delay: 2.5 },
+];
+
+function DashParticles() {
+  return (
+    <div className="dash-particles">
+      {PARTICLES.map((p, i) => (
+        <div key={i} className="dash-particle" style={{
+          width: p.s, height: p.s,
+          left: `${p.x}%`, top: `${p.y}%`,
+          animation: `dashParticleFloat ${p.d}s ease-in-out ${p.delay}s infinite`,
+        }} />
+      ))}
+      <div className="dash-light-sweep" />
+      <div className="dash-diagonal-ray" />
+    </div>
+  );
+}
+
+/* ── Judicial Seal SVG (slowly rotating watermark) ── */
+function DashJudicialSeal() {
+  return (
+    <svg className="dash-judicial-seal" viewBox="0 0 200 200" style={{ color: 'var(--seal-color)' }}>
+      <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="82" fill="none" stroke="currentColor" strokeWidth="0.5" />
+      <circle cx="100" cy="100" r="75" fill="none" stroke="currentColor" strokeWidth="0.5" />
+      <line x1="100" y1="50" x2="100" y2="120" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="70" y1="70" x2="130" y2="70" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M70,70 L60,95 L80,95 Z" fill="none" stroke="currentColor" strokeWidth="0.8" />
+      <path d="M130,70 L120,95 L140,95 Z" fill="none" stroke="currentColor" strokeWidth="0.8" />
+      <line x1="85" y1="120" x2="115" y2="120" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="80" y1="126" x2="120" y2="126" stroke="currentColor" strokeWidth="1" />
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((a) => (
+        <line key={a}
+          x1={100 + 86 * Math.cos(a * Math.PI / 180)} y1={100 + 86 * Math.sin(a * Math.PI / 180)}
+          x2={100 + 90 * Math.cos(a * Math.PI / 180)} y2={100 + 90 * Math.sin(a * Math.PI / 180)}
+          stroke="currentColor" strokeWidth="1" />
+      ))}
+      <text x="100" y="155" textAnchor="middle" fill="currentColor" fontSize="6.5"
+        fontFamily="'Cinzel', serif" letterSpacing="0.15em">E-COURT</text>
+      <text x="100" y="164" textAnchor="middle" fill="currentColor" fontSize="4"
+        fontFamily="'Inter', sans-serif" letterSpacing="0.1em">MANAGEMENT SYSTEM</text>
+    </svg>
+  );
+}
+
+/* ── Skeleton Loader ── */
+function DashSkeleton() {
+  return (
+    <div className="skeleton-grid">
+      <div className="skeleton-block skeleton-banner" />
+      <div className="skeleton-row">
+        {[0, 1, 2, 3].map(i => <div key={i} className="skeleton-block skeleton-kpi" />)}
+      </div>
+      <div className="skeleton-block skeleton-table" />
+      <div className="skeleton-panel-row">
+        <div className="skeleton-block skeleton-panel" />
+        <div className="skeleton-block skeleton-panel" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Animated Counter ── */
+function AnimatedCounter({ value }) {
+  const [display, setDisplay] = useState(0);
+  const prevRef = useRef(0);
+  useEffect(() => {
+    const target = Number(value) || 0;
+    const start = prevRef.current;
+    if (start === target) { setDisplay(target); return; }
+    const duration = 600;
+    const startTime = performance.now();
+    let raf;
+    const step = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(start + (target - start) * eased));
+      if (progress < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    prevRef.current = target;
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <span className="kpi-counter">{String(display).padStart(2, "0")}</span>;
+}
+
+/* ── Progress Ribbon ── */
+function ProgressRibbon({ status }) {
+  const currentIdx = getStageIndex(status);
+  return (
+    <div className="progress-ribbon">
+      {CASE_STAGES.map((stage, i) => {
+        const done = i < currentIdx;
+        const active = i === currentIdx;
+        return (
+          <span key={stage.key} style={{ display: "contents" }}>
+            {i > 0 && <span className={`ribbon-connector ${done ? "done" : active ? "active" : ""}`} />}
+            <span className={`ribbon-stage ${done ? "done" : active ? "active" : ""}`}>
+              <span className="ribbon-stage-icon">{stage.icon}</span>
+              {stage.label}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Command Palette ── */
+function CommandPalette({ cases, hearings, onNavigate, onClose }) {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const menuItems = useMemo(() => [
+    { icon: "📊", label: "Dashboard", action: () => onNavigate("Dashboard") },
+    { icon: "📁", label: "Assigned Cases", action: () => onNavigate("Assigned Cases") },
+    { icon: "📨", label: "Case Requests", action: () => onNavigate("Case Requests") },
+    { icon: "👥", label: "Clients", action: () => onNavigate("Clients") },
+    { icon: "📅", label: "Schedule / Hearings", action: () => onNavigate("Schedule / Hearings") },
+    { icon: "📄", label: "Documents", action: () => onNavigate("Documents") },
+    { icon: "💬", label: "Messages", action: () => onNavigate("Messages") },
+    { icon: "⚙️", label: "Profile Settings", action: () => onNavigate("__profile__") },
+  ], [onNavigate]);
+
+  const caseItems = useMemo(() =>
+    (cases || []).map(c => ({ icon: "⚖️", label: `${c.case_number} — ${c.category || c.title || "Case"}`, hint: c.status, action: () => { onNavigate("Dashboard"); onClose(); } })),
+    [cases, onNavigate, onClose]
+  );
+
+  const all = useMemo(() => [...menuItems, ...caseItems], [menuItems, caseItems]);
+  const filtered = useMemo(() => {
+    if (!query.trim()) return all.slice(0, 10);
+    const q = query.toLowerCase();
+    return all.filter(item => item.label.toLowerCase().includes(q)).slice(0, 10);
+  }, [query, all]);
+
+  return (
+    <div className="command-palette-backdrop" onClick={onClose}>
+      <div className="command-palette" onClick={e => e.stopPropagation()}>
+        <input ref={inputRef} className="command-palette-input" placeholder="Search cases, navigate menus…"
+          value={query} onChange={e => setQuery(e.target.value)}
+          onKeyDown={e => { if (e.key === "Escape") onClose(); }} />
+        <div className="command-palette-results">
+          {filtered.map((item, i) => (
+            <button key={i} className="command-palette-item" onClick={() => { item.action(); onClose(); }}>
+              <span className="command-palette-item-icon">{item.icon}</span>
+              <span className="command-palette-item-label">{item.label}</span>
+              {item.hint && <span className="command-palette-item-hint">{item.hint}</span>}
+            </button>
+          ))}
+          {!filtered.length && <p style={{ padding: "16px", color: "var(--muted)", textAlign: "center" }}>No results found</p>}
+        </div>
+        <div className="command-palette-footer">
+          <span><kbd>↑↓</kbd> Navigate</span>
+          <span><kbd>↵</kbd> Select</span>
+          <span><kbd>Esc</kbd> Close</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Document Preview Link ── */
+function DocPreviewLink({ url, resolveUrl, children }) {
+  const resolved = resolveUrl(url);
+  const isImg = /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(url || "");
+  return (
+    <span className="doc-preview-wrap">
+      <a href={resolved} target="_blank" rel="noreferrer" className="link-btn">{children}</a>
+      <span className={`doc-preview-tooltip ${!isImg ? "doc-preview-tooltip-pdf" : ""}`}>
+        {isImg ? <img src={resolved} alt="Preview" /> : "📄"}
+      </span>
+    </span>
+  );
+}
+
 function resolveAssetUrl(url) {
   if (!url) return "";
   if (/^https?:\/\/localhost(\/|$)/i.test(url)) {
@@ -38,12 +244,48 @@ function Dashboard() {
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
   /** all | hearings (upcoming slot) | delivered (closed) — driven by KPI "View details". */
   const [caseBrowseFilter, setCaseBrowseFilter] = useState("all");
+
+  /* ── NEW: Theme, Command Palette, Gavel ── */
+  const [theme, setTheme] = useState(() => localStorage.getItem("ecourt-theme") || "midnight");
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+  const [gavelKey, setGavelKey] = useState(null);
+
   const caseDetailRef = useRef(null);
   const caseTrackingPanelRef = useRef(null);
   const notificationsPanelRef = useRef(null);
   const hearingFeedPanelRef = useRef(null);
   const chatBodyRef = useRef(null);
   const navigate = useNavigate();
+
+  /* ── Apply theme to <html> ── */
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("ecourt-theme", theme);
+  }, [theme]);
+
+  /* ── Ctrl+K command palette ── */
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCmdPaletteOpen(v => !v); }
+      if (e.key === "Escape") setCmdPaletteOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  /* ── KPI hover-follow glow ── */
+  const handleKpiMouseMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+  };
+
+  /* ── Command palette navigate ── */
+  const cmdNavigate = useCallback((target) => {
+    if (target === "__profile__") { navigate("/profile"); }
+    else { setActiveMenu(target); }
+  }, [navigate]);
 
   const scrollToRef = (r) => {
     requestAnimationFrame(() => r.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -148,7 +390,7 @@ function Dashboard() {
   }, [cases, caseBrowseFilter]);
 
   const trackingColSpan =
-    6 +
+    7 +
     (showCaseTrackingDetails ? 1 : 0) +
     (["admin", "judge", "clerk"].includes(user?.role) ? 1 : 0);
 
@@ -285,7 +527,11 @@ function Dashboard() {
         // keep optimistic state
       }
 
-      if (action === "accept") setActiveMenu("Assigned Cases");
+      if (action === "accept") {
+        setActiveMenu("Assigned Cases");
+        setGavelKey(Date.now());
+        setTimeout(() => setGavelKey(null), 1200);
+      }
       alert(action === "accept" ? "Case accepted." : "Case declined.");
     } catch (e) {
       alert(e?.response?.data?.message || "Action failed. Please retry once.");
@@ -354,8 +600,24 @@ function Dashboard() {
 
   return (
     <div className="dashboard-layout">
+      {/* ── Ambient Background ── */}
+      <DashParticles />
+      <DashJudicialSeal />
+
+      {/* ── Command Palette ── */}
+      {cmdPaletteOpen && <CommandPalette cases={cases} hearings={hearings} onNavigate={cmdNavigate} onClose={() => setCmdPaletteOpen(false)} />}
+
+      {/* ── Gavel Strike Overlay ── */}
+      {gavelKey && <div key={gavelKey} style={{ position: "fixed", top: "40%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 80, pointerEvents: "none" }}><span className="gavel-strike-anim" style={{ fontSize: "4rem" }}>⚖️</span></div>}
+
       <aside className="dashboard-sidebar">
         <div className="dashboard-logo">E-COURT</div>
+
+        {/* Search shortcut */}
+        <button className="sidebar-shortcut" onClick={() => setCmdPaletteOpen(true)}>
+          🔍 Quick Search <kbd>Ctrl+K</kbd>
+        </button>
+
         <nav className="dashboard-menu">
           {user?.role === "public_user" ? (
             <button className="menu-item" onClick={() => navigate("/create-case")}>
@@ -375,6 +637,13 @@ function Dashboard() {
             </button>
           ))}
         </nav>
+
+        {/* Theme Switcher */}
+        <div className="theme-switcher">
+          <button className={`theme-btn ${theme === "midnight" ? "active" : ""}`} onClick={() => setTheme("midnight")}>🌙 Midnight</button>
+          <button className={`theme-btn ${theme === "chambers" ? "active" : ""}`} onClick={() => setTheme("chambers")}>🌿 Chambers</button>
+        </div>
+
         <button className="menu-item logout" onClick={handleLogout}>Logout</button>
       </aside>
 
@@ -407,7 +676,7 @@ function Dashboard() {
         </header>
 
         {loading ? (
-          <p>Loading dashboard...</p>
+          <DashSkeleton />
         ) : (
           <>
             <section className="welcome-banner">
@@ -420,9 +689,9 @@ function Dashboard() {
 
             <section className="kpi-grid">
               {dashboardStats.map((item) => (
-                <article key={item.label} className="kpi-card">
+                <article key={item.label} className="kpi-card" onMouseMove={handleKpiMouseMove}>
                   <p>{item.label}</p>
-                  <h3>{String(item.value).padStart(2, "0")}</h3>
+                  <h3><AnimatedCounter value={item.value} /></h3>
                   <button type="button" className="kpi-detail-link" onClick={() => handleKpiViewDetails(item.label)}>
                     View details
                   </button>
@@ -464,6 +733,7 @@ function Dashboard() {
                       <th>Jurisdiction</th>
                       <th>Slot</th>
                       <th>Judge</th>
+                      <th>Lifecycle</th>
                       {showCaseTrackingDetails ? <th>Details</th> : null}
                       {["admin", "judge", "clerk"].includes(user?.role) ? <th>Upload PDF</th> : null}
                     </tr>
@@ -483,6 +753,7 @@ function Dashboard() {
                             "--"
                           )}
                         </td>
+                        <td><ProgressRibbon status={item.status} /></td>
                         {showCaseTrackingDetails ? (
                           <td>
                             <button className="link-btn" onClick={() => openCaseDetails(item)}>View Full</button>
@@ -562,7 +833,7 @@ function Dashboard() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Case Title</th><th>Client Name</th><th>Status</th><th>Date</th><th>View</th>
+                        <th>Case Title</th><th>Client Name</th><th>Status</th><th>Lifecycle</th><th>Date</th><th>View</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -571,11 +842,12 @@ function Dashboard() {
                           <td>{item.category || item.case_type || "--"}</td>
                           <td>{item.complainant?.full_name || "--"}</td>
                           <td><span className="status-pill">{item.status}</span></td>
+                          <td><ProgressRibbon status={item.status} /></td>
                           <td>{item.created_at ? new Date(item.created_at).toLocaleDateString() : "--"}</td>
                           <td><button className="link-btn" onClick={() => openCaseDetails(item)}>View Details</button></td>
                         </tr>
                       ))}
-                      {!filteredAssignedCases.length ? <tr><td colSpan={5}>No {caseFilter} cases yet.</td></tr> : null}
+                      {!filteredAssignedCases.length ? <tr><td colSpan={6}>No {caseFilter} cases yet.</td></tr> : null}
                     </tbody>
                   </table>
                 </div>
@@ -590,7 +862,19 @@ function Dashboard() {
                   <table>
                     <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Case Count</th></tr></thead>
                     <tbody>
-                      {clientList.map((c) => <tr key={`${c.email}-${c.phone}`}><td>{c.name}</td><td>{c.phone}</td><td>{c.email}</td><td>{c.caseCount}</td></tr>)}
+                      {clientList.map((c) => (
+                        <tr key={`${c.email}-${c.phone}`}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="activity-dot green" />
+                              {c.name}
+                            </div>
+                          </td>
+                          <td>{c.phone}</td>
+                          <td>{c.email}</td>
+                          <td style={{ fontWeight: '600', color: 'var(--primary)' }}>{c.caseCount}</td>
+                        </tr>
+                      ))}
                       {!clientList.length ? <tr><td colSpan={4}>No clients yet.</td></tr> : null}
                     </tbody>
                   </table>
@@ -695,7 +979,7 @@ function Dashboard() {
             {showCaseTrackingDetails && selectedCase && ["Dashboard", "Assigned Cases", "Case Requests"].includes(activeMenu) ? (
               <section
                 ref={caseDetailRef}
-                className={`panel lawyer-case-detail-panel ${flashCasePanel ? "lawyer-case-detail-panel-flash" : ""}`}
+                className={`panel parchment-panel lawyer-case-detail-panel ${flashCasePanel ? "lawyer-case-detail-panel-flash" : ""}`}
               >
                 <div className="table-header-row">
                   <div>
@@ -744,9 +1028,9 @@ function Dashboard() {
                     <article className="lawyer-doc-card">
                       <h5>ID Proof</h5>
                       {selectedCase.id_proof_url ? (
-                        <a href={resolveAssetUrl(selectedCase.id_proof_url)} target="_blank" rel="noreferrer" className="link-btn">
+                        <DocPreviewLink url={selectedCase.id_proof_url} resolveUrl={resolveAssetUrl}>
                           Open ID Proof
-                        </a>
+                        </DocPreviewLink>
                       ) : (
                         <p>Not uploaded</p>
                       )}
@@ -758,12 +1042,9 @@ function Dashboard() {
                         <div className="lawyer-evidence-list">
                           {selectedCase.evidence_urls.map((url) => (
                             <div key={url} className="evidence-item">
-                              {isImageUrl(url) ? (
-                                <a href={resolveAssetUrl(url)} target="_blank" rel="noreferrer">
-                                  <img src={resolveAssetUrl(url)} alt="Evidence" className="evidence-thumb" />
-                                </a>
-                              ) : null}
-                              <a href={resolveAssetUrl(url)} target="_blank" rel="noreferrer" className="link-btn">Open File</a>
+                              <DocPreviewLink url={url} resolveUrl={resolveAssetUrl}>
+                                View File
+                              </DocPreviewLink>
                             </div>
                           ))}
                         </div>
@@ -780,25 +1061,37 @@ function Dashboard() {
               <div className="panel" ref={hearingFeedPanelRef}>
                 <h3>Hearing Calendar Feed</h3>
                 <p className="panel-subtitle">Stay updated with your upcoming hearings.</p>
-                <ul className="list">
+                <div className="client-activity-feed">
                   {hearings.map((hearing) => (
-                    <li key={hearing.id || hearing._id}>
-                      {hearing.title} - {new Date(hearing.scheduled_at).toLocaleString()}
-                    </li>
+                    <div key={hearing.id || hearing._id} className="activity-item">
+                      <span className="activity-dot blue" />
+                      <div>
+                        <strong>{hearing.title}</strong>
+                      </div>
+                      <span className="activity-time">
+                        {new Date(hearing.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   ))}
-                  {!hearings.length && <li>No hearings scheduled yet.</li>}
-                </ul>
+                  {!hearings.length && <p className="empty-state">No hearings scheduled yet.</p>}
+                </div>
               </div>
 
               <div className="panel" ref={notificationsPanelRef}>
                 <h3>Real-time Notifications</h3>
                 <p className="panel-subtitle">Stay updated with the latest alerts.</p>
-                <ul className="list">
+                <div className="client-activity-feed">
                   {notifications.map((note) => (
-                    <li key={note.id || note._id}>{note.title}: {note.message}</li>
+                    <div key={note.id || note._id} className="activity-item">
+                      <span className="activity-dot gold" />
+                      <div>
+                        <strong>{note.title}</strong>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: '2px 0 0' }}>{note.message}</p>
+                      </div>
+                    </div>
                   ))}
-                  {!notifications.length && <li>No notifications yet.</li>}
-                </ul>
+                  {!notifications.length && <p className="empty-state">No notifications yet.</p>}
+                </div>
               </div>
             </section>
           </>
