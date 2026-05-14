@@ -352,14 +352,14 @@ function Signup() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", objectPosition: "center top",
-              opacity: 0.55,
-              filter: "brightness(1.15) contrast(1.05)",
+              opacity: 0.75,
+              filter: "brightness(1.35) contrast(1.1)",
               animation: "heroFloat 20s ease-in-out infinite",
             }}
           />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(3,6,15,0.1) 0%, rgba(3,6,15,0.5) 40%, rgba(3,6,15,0.97) 100%)",
+            background: "linear-gradient(180deg, rgba(3,6,15,0.05) 0%, rgba(3,6,15,0.3) 40%, rgba(3,6,15,0.85) 100%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
@@ -462,11 +462,11 @@ function Signup() {
           {/* Scrollable form area */}
           <div style={{
             flex: 1, overflowY: "auto", zIndex: 2,
-            padding: "clamp(24px,4vw,48px) clamp(24px,5vw,72px)",
+            padding: "clamp(20px, 3.5vw, 40px) clamp(20px, 4.5vw, 60px)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <div style={{
-              width: "100%", maxWidth: 520,
+              width: "100%", maxWidth: 460,
               animation: mounted ? "revealUp 0.8s 0.35s ease both" : "none", opacity: 0,
             }}>
               {/* Header */}

@@ -358,8 +358,8 @@ function Login() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", objectPosition: "center 30%",
-              opacity: 0.5,
-              filter: "brightness(1.1) contrast(1.02)",
+              opacity: 0.7,
+              filter: "brightness(1.25) contrast(1.05)",
               animation: mounted ? "heroImgReveal 1.8s ease both" : "none",
             }}
           />
@@ -367,7 +367,7 @@ function Login() {
           {/* multi-layer gradient */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(3,6,15,0.15) 0%, rgba(3,6,15,0.5) 45%, rgba(3,6,15,0.97) 100%)",
+            background: "linear-gradient(180deg, rgba(3,6,15,0.05) 0%, rgba(3,6,15,0.3) 45%, rgba(3,6,15,0.9) 100%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
@@ -472,7 +472,7 @@ function Login() {
           {/* Form centered */}
           <div style={{
             flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "clamp(28px,4vw,48px) clamp(28px,6vw,72px)",
+            padding: "clamp(20px, 3.5vw, 40px) clamp(20px, 4.5vw, 60px)",
             zIndex: 2,
           }}>
             <div style={{
