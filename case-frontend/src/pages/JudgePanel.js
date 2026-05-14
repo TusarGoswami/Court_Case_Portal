@@ -18,20 +18,16 @@ import { AUTH_TOKEN_KEY, clearSession, getStoredUser, saveSession } from "../ser
 import { fetchStreamVideoCredentials } from "../services/streamVideo";
 
 const navItems = [
-  "Dashboard",
-  "Assigned Cases",
-  "Hearings",
-  "Judge Profile",
-  "Evidence Review",
-  "Judgments",
-  "Calendar",
-  "Analytics",
-  "Messages",
-  "Cause List",
-  "Courtrooms",
-  "Security Center",
-  "Settings",
-  "Logout",
+  { label: "Dashboard", icon: "🏛️" },
+  { label: "Assigned Cases", icon: "⚖️" },
+  { label: "Hearings", icon: "📅" },
+  { label: "Judge Profile", icon: "👤" },
+  { label: "Evidence Review", icon: "🔍" },
+  { label: "Judgments", icon: "📜" },
+  { label: "Calendar", icon: "🗓️" },
+  { label: "Messages", icon: "💬" },
+  { label: "Settings", icon: "⚙️" },
+  { label: "Logout", icon: "🚪" }
 ];
 
 /* ── Ambient Background (Unified) ── */
@@ -1201,41 +1197,41 @@ function JudgePanel() {
       <FilingParticles />
       <FilingJudicialSeal />
       
-      <div className="mx-auto flex max-w-[1920px] relative z-10">
-        <aside className="sticky top-0 flex h-screen w-72 flex-col p-6 glass-sidebar">
-          <div className="mb-10 text-center">
-            <div className="text-2xl font-bold tracking-[0.4em] text-white" style={{ fontFamily: 'Cinzel, serif' }}>
-              E-COURT
-            </div>
-            <div className="text-[0.65rem] tracking-[0.3em] text-amber-500/80 font-bold mt-1">JUDICIAL BENCH</div>
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-logo">
+          <div className="text-xl font-bold tracking-[0.2em] text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+            E-COURT
           </div>
-          
-          <nav className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
-            {navItems.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => (item === "Logout" ? logout() : setActiveNav(item))}
-                className={`sidebar-shortcut ${activeNav === item ? 'active' : ''}`}
-                style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left' }}
-              >
-                {item.toUpperCase()}
-              </button>
-            ))}
-          </nav>
-
-          <div className="mt-8 pt-6 border-t border-white/5">
-             <button 
-              onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
-              className="theme-btn active"
-              style={{ width: '100%', fontSize: '0.7rem' }}
+          <div className="text-[0.5rem] tracking-[0.2em] text-amber-500/80 font-bold">JUDICIAL BENCH</div>
+        </div>
+        
+        <nav className="dashboard-menu">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => (item.label === "Logout" ? logout() : setActiveNav(item.label))}
+              className={`menu-item ${activeNav === item.label ? 'active' : ''}`}
             >
-              {theme === 'midnight' ? '🌙 MIDNIGHT BENCH' : '🏛️ CLASSIC CHAMBERS'}
+              <i>{item.icon}</i>
+              <span className="menu-item-text">{item.label}</span>
             </button>
-          </div>
-        </aside>
+          ))}
+        </nav>
 
-        <main className="flex-1 space-y-6 p-8">
+        <div className="theme-switcher">
+           <button 
+            onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
+            className="theme-btn active"
+            style={{ width: '100%', fontSize: '0.7rem' }}
+          >
+            {theme === 'midnight' ? '🌙' : '🏛️'}
+          </button>
+        </div>
+      </aside>
+
+      <main className="dashboard-main">
+        <div className="mx-auto max-w-[1600px] space-y-6">
           <header className="flex flex-wrap items-center gap-6 p-6 cinematic-card" style={{ padding: '16px 24px' }}>
             <div className="flex-1 min-w-[300px]">
               <div style={{ position: 'relative' }}>
@@ -1285,7 +1281,8 @@ function JudgePanel() {
             ) : renderSection()}
           </div>
         </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

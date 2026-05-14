@@ -383,7 +383,6 @@ export default function CreateCase() {
         )}
 
         {step === 3 && (
-        {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div style={{ 
               display: 'grid', 
@@ -505,7 +504,6 @@ export default function CreateCase() {
               </div>
             </div>
           </div>
-        )}
         )}
       </div>
     </div>

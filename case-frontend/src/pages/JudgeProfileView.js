@@ -72,12 +72,12 @@ function JudgeProfileView() {
 
   return (
     <>
-      <div className="dashboard-layout" style={{ minHeight: '100vh', padding: '40px' }}>
+      <div className="dashboard-layout" style={{ minHeight: '100vh', padding: 'clamp(16px, 4vw, 40px)' }}>
         <FilingParticles />
         <FilingJudicialSeal />
         
         <div className="mx-auto max-w-6xl relative z-10">
-          <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+          <header style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: '40px' }}>
             <button className="ghost-btn" onClick={() => navigate(-1)}>← RETURN TO ROSTER</button>
             <div className="text-right">
               <div style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', letterSpacing: '2px' }}>JUDICIAL COMMISSION</div>
