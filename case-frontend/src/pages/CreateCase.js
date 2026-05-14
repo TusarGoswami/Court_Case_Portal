@@ -1,70 +1,120 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import "../App.css";
 
 const API_BASE = api?.defaults?.baseURL || "http://127.0.0.1:8000/api";
 const BACKEND_BASE = API_BASE.replace(/\/api\/?$/, "");
 const CASE_CATEGORIES = ["Criminal", "Civil", "Property", "Cyber Crime", "Family", "Consumer", "Corporate"];
 const JURISDICTIONS = ["Delhi", "Mumbai", "Bengaluru", "Hyderabad"];
 
-function classNames(...xs) {
-  return xs.filter(Boolean).join(" ");
-}
+/* ── Ambient Background (Reused from Dashboard) ── */
+const PARTICLES = [
+  { x: 10, y: 20, s: 2, d: 8, delay: 0 },
+  { x: 40, y: 50, s: 3, d: 9, delay: 1 },
+  { x: 70, y: 15, s: 2, d: 7, delay: 0.5 },
+  { x: 90, y: 60, s: 4, d: 10, delay: 2 },
+  { x: 20, y: 80, s: 2, d: 6, delay: 1.5 },
+];
 
-function resolveLawyerImage(pathOrUrl, fallbackName = "Tushar") {
-  if (!pathOrUrl) return `${BACKEND_BASE}/images/${encodeURIComponent(fallbackName)}.png`;
-  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
-  return `${BACKEND_BASE}${clean}`;
-}
-
-function StepPill({ active, done, children }) {
+function FilingParticles() {
   return (
-    <div className={classNames("flex items-center gap-2 rounded-full border px-3 py-1 text-sm", active ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-600", done ? "ring-1 ring-emerald-200" : "")}>
-      <span className={classNames("h-2.5 w-2.5 rounded-full", done ? "bg-emerald-500" : active ? "bg-blue-600" : "bg-slate-300")} />
-      {children}
+    <div className="dash-particles" style={{ fixed: true }}>
+      {PARTICLES.map((p, i) => (
+        <div key={i} className="dash-particle" style={{
+          width: p.s, height: p.s,
+          left: `${p.x}%`, top: `${p.y}%`,
+          animation: `dashParticleFloat ${p.d}s ease-in-out ${p.delay}s infinite`,
+        }} />
+      ))}
+      <div className="dash-light-sweep" />
+      <div className="dash-diagonal-ray" />
     </div>
   );
 }
 
-function Input(props) {
-  return <input {...props} className={classNames("w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100", props.className)} />;
-}
-
-function Textarea(props) {
-  return <textarea {...props} className={classNames("w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100", props.className)} />;
-}
-
-function Select(props) {
-  return <select {...props} className={classNames("w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100", props.className)} />;
-}
-
-function UploadBox({ title, hint, files, progressMap, onFiles, onRemove }) {
-  const onDrop = (e) => {
-    e.preventDefault();
-    onFiles(Array.from(e.dataTransfer.files || []));
-  };
+function FilingJudicialSeal() {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm backdrop-blur" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
-      <p className="font-semibold text-slate-800">{title}</p>
-      <p className="text-xs text-slate-500">{hint}</p>
-      <label className="mt-3 flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-blue-300 bg-blue-50/60 px-3 py-6 text-sm font-semibold text-blue-700">
-        Drop files here or click to upload
+    <svg className="dash-judicial-seal" style={{ position: 'fixed', opacity: 0.02, right: '-10%', top: '10%', width: '600px', color: 'var(--primary)' }} viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="1" />
+      <circle cx="100" cy="100" r="82" fill="none" stroke="currentColor" strokeWidth="0.5" />
+      <text x="100" y="155" textAnchor="middle" fill="currentColor" fontSize="6" fontFamily="'Cinzel', serif" letterSpacing="0.2em">JUSTITIA</text>
+    </svg>
+  );
+}
+
+/* ── UI Components ── */
+function StepRibbon({ steps, currentStep }) {
+  return (
+    <div className="progress-ribbon" style={{ marginBottom: '24px', justifyContent: 'center' }}>
+      {steps.map((s, i) => {
+        const stepNum = i + 1;
+        const done = stepNum < currentStep;
+        const active = stepNum === currentStep;
+        return (
+          <span key={s} style={{ display: "contents" }}>
+            {i > 0 && <span className={`ribbon-connector ${done ? "done" : active ? "active" : ""}`} />}
+            <span className={`ribbon-stage ${done ? "done" : active ? "active" : ""}`} style={{ cursor: 'default' }}>
+              <span className="ribbon-stage-icon">{done ? "✓" : stepNum}</span>
+              {s}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function FilingInput({ label, error, ...props }) {
+  return (
+    <div className="input-group">
+      {label && <label className="input-label">{label}</label>}
+      <input {...props} className={`auth-input ${error ? 'error' : ''}`} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }} />
+      {error && <p className="input-error-msg">{error}</p>}
+    </div>
+  );
+}
+
+function FilingSelect({ label, options, ...props }) {
+  return (
+    <div className="input-group">
+      {label && <label className="input-label">{label}</label>}
+      <select {...props} className="auth-input" style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
+        {options.map(o => <option key={o} value={o} style={{ background: '#0B132B' }}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function FilingTextarea({ label, ...props }) {
+  return (
+    <div className="input-group">
+      {label && <label className="input-label">{label}</label>}
+      <textarea {...props} className="auth-input" style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', minHeight: '120px', resize: 'vertical' }} />
+    </div>
+  );
+}
+
+function FilingUploadBox({ title, hint, files, progressMap, onFiles, onRemove }) {
+  const onDrop = (e) => { e.preventDefault(); onFiles(Array.from(e.dataTransfer.files || [])); };
+  return (
+    <div className="kpi-card" style={{ padding: '20px', background: 'rgba(30,37,65,0.4)', cursor: 'default' }} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
+      <h4 style={{ color: 'var(--primary)', marginBottom: '4px', fontSize: '0.95rem' }}>{title}</h4>
+      <p style={{ color: 'var(--muted)', fontSize: '0.75rem', marginBottom: '12px' }}>{hint}</p>
+      <label className="sidebar-shortcut" style={{ borderStyle: 'dashed', justifyContent: 'center', padding: '20px', background: 'rgba(212,175,55,0.03)' }}>
+        <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>📁</span> Drop files or click
         <input type="file" className="hidden" multiple onChange={(e) => onFiles(Array.from(e.target.files || []))} />
       </label>
-      <div className="mt-3 space-y-2">
+      <div className="mt-3" style={{ display: 'grid', gap: '8px' }}>
         {files.map((f) => (
-          <div key={f.id} className="rounded-xl border border-slate-200 p-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-700">{f.file.name}</p>
-                <p className="text-xs text-slate-500">{Math.round((f.file.size || 0) / 1024)} KB</p>
+          <div key={f.id} className="activity-item" style={{ background: 'rgba(0,0,0,0.2)', padding: '10px' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: '0.8rem', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.file.name}</p>
+              <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: 'var(--primary)', width: `${progressMap[f.id] || 0}%`, transition: 'width 0.3s ease' }} />
               </div>
-              <button type="button" className="rounded-lg bg-rose-50 px-2 py-1 text-xs font-bold text-rose-700" onClick={() => onRemove(f.id)}>Remove</button>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all" style={{ width: `${progressMap[f.id] || 0}%` }} />
-            </div>
+            <button type="button" style={{ color: '#fca5a5', fontSize: '0.7rem', fontWeight: 'bold', background: 'transparent', border: 'none', cursor: 'pointer' }} onClick={() => onRemove(f.id)}>REMOVE</button>
           </div>
         ))}
       </div>
@@ -73,88 +123,18 @@ function UploadBox({ title, hint, files, progressMap, onFiles, onRemove }) {
 }
 
 const LAWYERS = [
-  {
-    id: "jagdishwar",
-    name: "Jagdishwar Mishra",
-    role: "Senior Advocate",
-    photo_url: "/images/Jagdishwar_Mishra.png",
-    fee: 999,
-    rating: 4.9,
-    experience: "15+ yrs",
-    totalCases: 1200,
-    winPct: "84%",
-    languages: "Hindi, English",
-    courtExpertise: "High Court, Supreme Court",
-    badge: "Available",
-    specializations: ["Criminal Law", "Constitutional Law"],
-    education: "LL.M, National Law University",
-    practiceAreas: "Criminal, PIL, Constitutional",
-    recentCases: "Won 3 high-profile constitutional matters",
-    reviews: "4.9 from 420+ client reviews",
-    consultation: ["Video", "Audio", "Physical"],
-  },
-  {
-    id: "jagdish",
-    name: "Jagdish Tyagi",
-    role: "Advocate",
-    photo_url: "/images/Jagdish_Tyagi.png",
-    fee: 1499,
-    rating: 4.7,
-    experience: "10+ yrs",
-    totalCases: 940,
-    winPct: "80%",
-    languages: "Hindi, English",
-    courtExpertise: "District Court, Consumer Forum",
-    badge: "Available",
-    specializations: ["Civil Law", "Consumer Cases"],
-    education: "LL.B, Delhi University",
-    practiceAreas: "Civil, Consumer, Claims",
-    recentCases: "Secured favorable settlement in 70+ disputes",
-    reviews: "4.7 from 300+ client reviews",
-    consultation: ["Video", "Audio", "Physical"],
-  },
-  {
-    id: "rahman",
-    name: "Rahman Dakaait",
-    role: "Criminal Law Expert",
-    photo_url: "/images/Rahman_Dakaait.png",
-    fee: 1999,
-    rating: 4.8,
-    experience: "12+ yrs",
-    totalCases: 1100,
-    winPct: "82%",
-    languages: "Hindi, English, Urdu",
-    courtExpertise: "Sessions Court, High Court",
-    badge: "Available",
-    specializations: ["Criminal Defense", "Fraud Cases"],
-    education: "LL.M, Aligarh Muslim University",
-    practiceAreas: "Criminal Defense, Fraud, Bail",
-    recentCases: "Handled complex fraud trial acquittals",
-    reviews: "4.8 from 360+ client reviews",
-    consultation: ["Video", "Audio", "Physical"],
-    popular: true,
-  },
-  {
-    id: "tushar",
-    name: "Tushar",
-    role: "Junior Advocate",
-    photo_url: "/images/Tushar.png",
-    fee: 2499,
-    rating: 4.5,
-    experience: "3+ yrs",
-    totalCases: 210,
-    winPct: "74%",
-    languages: "Hindi, English",
-    courtExpertise: "District Court",
-    badge: "Available",
-    specializations: ["Legal Research", "Drafting"],
-    education: "B.A. LL.B",
-    practiceAreas: "Drafting, Corporate Basics, Research",
-    recentCases: "Supported 120+ detailed legal filings",
-    reviews: "4.5 from 130+ client reviews",
-    consultation: ["Video", "Audio", "Physical"],
-  },
+  { id: "jagdishwar", name: "Jagdishwar Mishra", role: "Senior Advocate", photo_url: "/images/Jagdishwar_Mishra.png", fee: 999, rating: 4.9, experience: "15+ yrs", totalCases: 1200, winPct: "84%", specializations: ["Criminal", "Constitutional"], education: "LL.M, NLU" },
+  { id: "jagdish", name: "Jagdish Tyagi", role: "Advocate", photo_url: "/images/Jagdish_Tyagi.png", fee: 1499, rating: 4.7, experience: "10+ yrs", totalCases: 940, winPct: "80%", specializations: ["Civil", "Consumer"], education: "LL.B, DU" },
+  { id: "rahman", name: "Rahman Dakaait", role: "Criminal Expert", photo_url: "/images/Rahman_Dakaait.png", fee: 1999, rating: 4.8, experience: "12+ yrs", totalCases: 1100, winPct: "82%", specializations: ["Criminal", "Fraud"], education: "LL.M, AMU", popular: true },
+  { id: "tushar", name: "Tushar", role: "Junior Advocate", photo_url: "/images/Tushar.png", fee: 2499, rating: 4.5, experience: "3+ yrs", totalCases: 210, winPct: "74%", specializations: ["Research", "Drafting"], education: "B.A. LL.B" },
 ];
+
+function resolveLawyerImage(pathOrUrl, fallbackName = "Tushar") {
+  if (!pathOrUrl) return `${BACKEND_BASE}/images/${encodeURIComponent(fallbackName)}.png`;
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  return `${BACKEND_BASE}${clean}`;
+}
 
 export default function CreateCase() {
   const navigate = useNavigate();
@@ -164,35 +144,13 @@ export default function CreateCase() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(null);
   const [selectedLawyer, setSelectedLawyer] = useState(null);
-  const [expandedLawyer, setExpandedLawyer] = useState(null);
   const [slots, setSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingId, setBookingId] = useState(null);
 
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    caseTitle: "",
-    caseCategory: "Criminal",
-    caseDescription: "",
-    incidentDate: "",
-    opponentName: "",
-    jurisdiction: "Delhi",
-    emergency: false,
-    declarationAccepted: false,
-    signature: "",
-  });
-
-  const [uploadBuckets, setUploadBuckets] = useState({
-    firCopy: [],
-    idProof: [],
-    supporting: [],
-    media: [],
-    pdfEvidence: [],
-  });
+  const [form, setForm] = useState({ fullName: "", email: "", phone: "", address: "", caseTitle: "", caseCategory: "Criminal", caseDescription: "", incidentDate: "", opponentName: "", jurisdiction: "Delhi", emergency: false, declarationAccepted: false, signature: "" });
+  const [uploadBuckets, setUploadBuckets] = useState({ firCopy: [], idProof: [], supporting: [], media: [], pdfEvidence: [] });
   const [uploadProgress, setUploadProgress] = useState({});
 
   const addFilesToBucket = (bucket, files) => {
@@ -204,7 +162,7 @@ export default function CreateCase() {
         pct += 20;
         setUploadProgress((prev) => ({ ...prev, [entry.id]: Math.min(100, pct) }));
         if (pct >= 100) clearInterval(tick);
-      }, 120);
+      }, 100);
     });
   };
 
@@ -216,34 +174,24 @@ export default function CreateCase() {
   const validateStep1 = () => {
     if (!form.fullName.trim()) return "Full Name is required.";
     if (!form.email.trim()) return "Email is required.";
-    if (!form.phone.trim()) return "Phone Number is required.";
-    if (!form.address.trim()) return "Address is required.";
+    if (!form.phone.trim()) return "Phone is required.";
     if (!form.caseTitle.trim()) return "Case Title is required.";
-    if (!form.caseDescription.trim() || form.caseDescription.trim().length < 30) return "Case description should be at least 30 characters.";
-    if (!form.incidentDate) return "Incident Date is required.";
-    if (!form.opponentName.trim()) return "Opponent Name is required.";
-    if (!uploadBuckets.idProof.length) return "Aadhaar/ID Proof is required.";
-    if (!form.declarationAccepted) return "Please accept declaration.";
+    if (!form.caseDescription.trim() || form.caseDescription.length < 30) return "Provide a detailed case description (min 30 chars).";
+    if (!uploadBuckets.idProof.length) return "Identity proof (Aadhaar/ID) is mandatory.";
+    if (!form.declarationAccepted) return "Please accept the legal declaration.";
     if (!form.signature.trim()) return "Digital signature is required.";
     return "";
   };
 
   const goStep2 = () => {
-    setError("");
     const msg = validateStep1();
-    if (msg) {
-      setError(msg);
-      return;
-    }
+    if (msg) { setError(msg); return; }
+    setError("");
     setStep(2);
   };
 
   const goStep3 = async () => {
-    if (!selectedLawyer) {
-      setError("Please select a lawyer.");
-      return;
-    }
-    setError("");
+    if (!selectedLawyer) { setError("Select a legal expert to proceed."); return; }
     setLoadingSlots(true);
     try {
       const res = await api.get("/slots", { params: { lawyer_id: selectedLawyer.id } });
@@ -251,102 +199,61 @@ export default function CreateCase() {
       setSlots(all);
       setSelectedDate(all[0]?.date || "");
       setStep(3);
-    } catch (e) {
-      setError(e?.response?.data?.message || "Could not load slots.");
-    } finally {
-      setLoadingSlots(false);
-    }
+    } catch (e) { setError("Could not load availability."); } finally { setLoadingSlots(false); }
   };
 
   const reserveSlot = async (slot) => {
-    setError("");
     setSelectedSlot(slot);
     setBookingId(null);
     try {
       const res = await api.post("/book-slot", { lawyer_id: selectedLawyer.id, slot_time: slot.slot_time });
       setBookingId(res.data.data?._id || res.data.data?.id);
-    } catch (e) {
-      setError(e?.response?.data?.message || "Could not book slot.");
-    }
+    } catch (e) { setError("Slot booking failed."); }
   };
 
   const submitCase = async () => {
-    if (!bookingId) {
-      setError("Please select and reserve a slot first.");
-      return;
-    }
+    if (!bookingId) return setError("Please confirm a time slot first.");
     setSubmitting(true);
-    setError("");
     try {
       const fd = new FormData();
       const isCriminal = form.caseCategory.toLowerCase().includes("criminal") || form.caseCategory.toLowerCase().includes("cyber");
-
       fd.append("case_type", isCriminal ? "Criminal" : "Civil");
       fd.append("category", form.caseCategory);
       fd.append("jurisdiction", form.jurisdiction);
-      fd.append("complainant", JSON.stringify({
-        full_name: form.fullName,
-        parent_name: "Not Provided",
-        address_permanent: form.address,
-        address_current: form.address,
-        phone: form.phone,
-        email: form.email,
-        occupation: "Not Provided",
-      }));
-      fd.append("accused", JSON.stringify({
-        name: form.opponentName,
-        address: "Not Provided",
-        contact_info: "Not Provided",
-        relationship: "Legal Opponent",
-      }));
-      fd.append("incident", JSON.stringify({
-        date: form.incidentDate,
-        time: "10:00",
-        location: form.jurisdiction,
-        description: `${form.caseTitle}. ${form.caseDescription}`,
-      }));
-      fd.append("witnesses", JSON.stringify([]));
-      fd.append("relief_requested", form.emergency ? `${form.caseDescription}\n\n[Urgent Legal Assistance Requested]` : form.caseDescription);
+      fd.append("complainant", JSON.stringify({ full_name: form.fullName, address_permanent: form.address, phone: form.phone, email: form.email }));
+      fd.append("accused", JSON.stringify({ name: form.opponentName }));
+      fd.append("incident", JSON.stringify({ date: form.incidentDate, description: `${form.caseTitle}. ${form.caseDescription}` }));
+      fd.append("relief_requested", form.caseDescription);
       fd.append("declaration", JSON.stringify({ accepted: form.declarationAccepted, signature: form.signature }));
       fd.append("lawyer_id", selectedLawyer.id);
       fd.append("booking_id", bookingId);
-
       fd.append("id_proof", uploadBuckets.idProof[0].file);
-      [...uploadBuckets.firCopy, ...uploadBuckets.supporting, ...uploadBuckets.media, ...uploadBuckets.pdfEvidence].forEach((x) => fd.append("evidence[]", x.file));
-
-      const res = await api.post("/create-case", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      [...uploadBuckets.firCopy, ...uploadBuckets.supporting, ...uploadBuckets.media, ...uploadBuckets.pdfEvidence].forEach(x => fd.append("evidence[]", x.file));
+      const res = await api.post("/create-case", fd);
       setSuccess(res.data.data);
-    } catch (e) {
-      const firstError = e?.response?.data?.errors ? Object.values(e.response.data.errors)[0]?.[0] : null;
-      setError(firstError || e?.response?.data?.message || "Could not submit case.");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (e) { setError(e?.response?.data?.message || "Submission failed."); } finally { setSubmitting(false); }
   };
 
   const groupedDates = useMemo(() => {
     const map = new Map();
-    slots.forEach((s) => {
-      const arr = map.get(s.date) || [];
-      arr.push(s);
-      map.set(s.date, arr);
-    });
+    slots.forEach(s => { const arr = map.get(s.date) || []; arr.push(s); map.set(s.date, arr); });
     return Array.from(map.entries()).map(([date, items]) => ({ date, items }));
   }, [slots]);
-  const dateSlots = useMemo(() => groupedDates.find((d) => d.date === selectedDate)?.items || [], [groupedDates, selectedDate]);
 
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="rounded-xl bg-emerald-50 p-4 text-emerald-900">
-            <p className="text-lg font-bold">Case submitted successfully</p>
-            <p className="mt-1 text-sm">Tracking Case ID</p>
-            <p className="mt-2 text-2xl font-extrabold">{success.case_number}</p>
+      <div className="dashboard-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <FilingParticles />
+        <div className="parchment-panel" style={{ width: 'min(600px, 95vw)', textAlign: 'center', zIndex: 10 }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '12px' }}>Case Filed Successfully</h2>
+          <div className="activity-item" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid var(--primary)', padding: '24px', borderRadius: '16px', display: 'block' }}>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Official Case Tracking Number</p>
+            <p style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--primary)', fontFamily: 'Cinzel, serif', margin: '12px 0' }}>{success.case_number}</p>
+            <p style={{ color: 'var(--text)', opacity: 0.8 }}>Your case has been recorded in the digital archives. A lawyer will review your submission shortly.</p>
           </div>
-          <div className="mt-5 flex gap-3">
-            <button className="rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2.5 text-sm font-bold text-white" onClick={() => navigate("/dashboard")}>Go to Dashboard</button>
-            <button className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold" onClick={() => window.location.reload()}>Create Another Case</button>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '32px', justifyContent: 'center' }}>
+            <button className="theme-btn active" style={{ padding: '12px 24px' }} onClick={() => navigate("/dashboard")}>GO TO DASHBOARD</button>
+            <button className="theme-btn" style={{ padding: '12px 24px', border: '1px solid var(--border)' }} onClick={() => window.location.reload()}>FILE ANOTHER CASE</button>
           </div>
         </div>
       </div>
@@ -354,256 +261,183 @@ export default function CreateCase() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-100">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="dashboard-layout" style={{ display: 'block', overflowY: 'auto' }}>
+      <FilingParticles />
+      <FilingJudicialSeal />
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px', position: 'relative', zIndex: 5 }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">Create Case</h1>
-            <p className="text-sm text-slate-600">Digital premium filing flow for citizens.</p>
+            <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: '2.5rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>DIGITAL CASE FILING</h1>
+            <p style={{ color: 'var(--muted)', letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase' }}>Judicial Submission Portal — Citizen Service</p>
           </div>
-          <button className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold" onClick={() => navigate("/dashboard")}>Back</button>
-        </div>
+          <button className="ghost-btn" style={{ color: 'var(--text)', opacity: 0.7 }} onClick={() => navigate("/dashboard")}>← BACK TO DASHBOARD</button>
+        </header>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <StepPill active={step === 1} done={step > 1}>Step 1 • Case Details</StepPill>
-          <StepPill active={step === 2} done={step > 2}>Step 2 • Select Lawyer</StepPill>
-          <StepPill active={step === 3} done={false}>Step 3 • Book Time Slot</StepPill>
-        </div>
+        <StepRibbon steps={["CASE DETAILS", "LEGAL EXPERT", "CONFIRM SLOT"]} currentStep={step} />
 
-        {error ? <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div> : null}
+        {error && <div className="activity-item" style={{ background: 'rgba(220,38,38,0.1)', borderColor: 'rgba(220,38,38,0.2)', color: '#fca5a5', marginBottom: '24px', padding: '12px 20px' }}>⚠️ {error}</div>}
 
-        {step === 1 ? (
-          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-            <div className="space-y-5 lg:col-span-2">
-              <section className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur">
-                <h2 className="text-lg font-extrabold text-slate-900">Personal Information</h2>
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <Input placeholder="Full Name" value={form.fullName} onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))} />
-                  <Input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
-                  <Input placeholder="Phone Number" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
-                  <Input placeholder="Address" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
+        {step === 1 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
+            <div style={{ display: 'grid', gap: '24px' }}>
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part I: Petitioner Details</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <FilingInput label="Full Legal Name" value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} />
+                  <FilingInput label="Email Address" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                  <FilingInput label="Phone Number" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                  <FilingInput label="Current Address" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} />
                 </div>
               </section>
 
-              <section className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur">
-                <h2 className="text-lg font-extrabold text-slate-900">Case Information</h2>
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <Input placeholder="Case Title" value={form.caseTitle} onChange={(e) => setForm((p) => ({ ...p, caseTitle: e.target.value }))} />
-                  <Select value={form.caseCategory} onChange={(e) => setForm((p) => ({ ...p, caseCategory: e.target.value }))}>
-                    {CASE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                  </Select>
-                  <Input type="date" value={form.incidentDate} onChange={(e) => setForm((p) => ({ ...p, incidentDate: e.target.value }))} />
-                  <Input placeholder="Opponent Name" value={form.opponentName} onChange={(e) => setForm((p) => ({ ...p, opponentName: e.target.value }))} />
-                  <Select value={form.jurisdiction} onChange={(e) => setForm((p) => ({ ...p, jurisdiction: e.target.value }))}>
-                    {JURISDICTIONS.map((j) => <option key={j}>{j}</option>)}
-                  </Select>
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3">
-                    <label className="text-sm font-semibold text-slate-700">Need urgent legal assistance?</label>
-                    <input type="checkbox" checked={form.emergency} onChange={(e) => setForm((p) => ({ ...p, emergency: e.target.checked }))} />
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part II: Incident & Case Particulars</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <FilingInput label="Case Title / Subject" value={form.caseTitle} onChange={e => setForm(p => ({ ...p, caseTitle: e.target.value }))} />
+                  <FilingSelect label="Case Category" options={CASE_CATEGORIES} value={form.caseCategory} onChange={e => setForm(p => ({ ...p, caseCategory: e.target.value }))} />
+                  <FilingInput label="Date of Incident" type="date" value={form.incidentDate} onChange={e => setForm(p => ({ ...p, incidentDate: e.target.value }))} />
+                  <FilingInput label="Opponent Name" value={form.opponentName} onChange={e => setForm(p => ({ ...p, opponentName: e.target.value }))} />
+                  <FilingSelect label="Court Jurisdiction" options={JURISDICTIONS} value={form.jurisdiction} onChange={e => setForm(p => ({ ...p, jurisdiction: e.target.value }))} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <input type="checkbox" checked={form.emergency} onChange={e => setForm(p => ({ ...p, emergency: e.target.checked }))} />
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text)' }}>Request Emergency Handling</label>
                   </div>
-                  <div className="md:col-span-2">
-                    <Textarea rows={4} placeholder="Case Description" value={form.caseDescription} onChange={(e) => setForm((p) => ({ ...p, caseDescription: e.target.value }))} />
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <FilingTextarea label="Factual Description of Case" value={form.caseDescription} onChange={e => setForm(p => ({ ...p, caseDescription: e.target.value }))} />
                   </div>
                 </div>
-                {form.emergency ? (
-                  <div className="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-3">
-                    <p className="font-bold text-rose-700">Emergency Case Badge Enabled</p>
-                    <p className="text-sm text-rose-600">Priority fee may apply during final billing.</p>
-                  </div>
-                ) : null}
               </section>
 
-              <section className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur">
-                <h2 className="text-lg font-extrabold text-slate-900">Evidence & Documents Upload</h2>
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <UploadBox title="FIR Copy" hint="PDF / Image" files={uploadBuckets.firCopy} progressMap={uploadProgress} onFiles={(f) => addFilesToBucket("firCopy", f)} onRemove={(id) => removeFile("firCopy", id)} />
-                  <UploadBox title="Aadhaar / ID Proof" hint="Required" files={uploadBuckets.idProof} progressMap={uploadProgress} onFiles={(f) => addFilesToBucket("idProof", f)} onRemove={(id) => removeFile("idProof", id)} />
-                  <UploadBox title="Supporting Documents" hint="Court papers, notices" files={uploadBuckets.supporting} progressMap={uploadProgress} onFiles={(f) => addFilesToBucket("supporting", f)} onRemove={(id) => removeFile("supporting", id)} />
-                  <UploadBox title="Images / Videos" hint="Visual evidence" files={uploadBuckets.media} progressMap={uploadProgress} onFiles={(f) => addFilesToBucket("media", f)} onRemove={(id) => removeFile("media", id)} />
-                  <UploadBox title="PDF Evidence" hint="Supplementary PDFs" files={uploadBuckets.pdfEvidence} progressMap={uploadProgress} onFiles={(f) => addFilesToBucket("pdfEvidence", f)} onRemove={(id) => removeFile("pdfEvidence", id)} />
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part III: Evidentiary Documentation</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <FilingUploadBox title="Identity Proof" hint="Aadhaar / Passport (Required)" files={uploadBuckets.idProof} progressMap={uploadProgress} onFiles={f => addFilesToBucket("idProof", f)} onRemove={id => removeFile("idProof", id)} />
+                  <FilingUploadBox title="Supporting Evidence" hint="Images / Media" files={uploadBuckets.media} progressMap={uploadProgress} onFiles={f => addFilesToBucket("media", f)} onRemove={id => removeFile("media", id)} />
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <FilingUploadBox title="Legal Documents" hint="FIR, Affidavits, Notices (PDF)" files={uploadBuckets.pdfEvidence} progressMap={uploadProgress} onFiles={f => addFilesToBucket("pdfEvidence", f)} onRemove={id => removeFile("pdfEvidence", id)} />
+                  </div>
                 </div>
               </section>
             </div>
 
-            <aside className="space-y-4">
-              <section className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur">
-                <p className="text-sm font-bold text-slate-800">Declaration</p>
-                <div className="mt-3 space-y-3">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={form.declarationAccepted} onChange={(e) => setForm((p) => ({ ...p, declarationAccepted: e.target.checked }))} />
-                    I certify that all details are true.
-                  </label>
-                  <Input placeholder="Digital Signature (type name)" value={form.signature} onChange={(e) => setForm((p) => ({ ...p, signature: e.target.value }))} />
+            <aside>
+              <div className="parchment-panel" style={{ position: 'sticky', top: '20px', padding: '24px' }}>
+                <h4 style={{ fontFamily: 'Cinzel, serif', marginBottom: '16px' }}>Oath & Declaration</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--muted)', fontStyle: 'italic', marginBottom: '16px' }}>I hereby declare that the information provided is accurate to the best of my knowledge.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <input type="checkbox" checked={form.declarationAccepted} onChange={e => setForm(p => ({ ...p, declarationAccepted: e.target.checked }))} />
+                  <label style={{ fontSize: '0.8rem' }}>I Accept</label>
                 </div>
-              </section>
-              <section className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur">
-                <p className="text-sm font-bold text-slate-800">Proceed</p>
-                <p className="mt-1 text-sm text-slate-600">Move to lawyer selection.</p>
-                <button className="mt-3 w-full rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2.5 text-sm font-bold text-white" onClick={goStep2}>
-                  Continue to Step 2
-                </button>
-              </section>
+                <FilingInput label="Digital Signature (Full Name)" value={form.signature} onChange={e => setForm(p => ({ ...p, signature: e.target.value }))} />
+                <button className="theme-btn active" style={{ width: '100%', padding: '14px', marginTop: '24px', fontSize: '0.9rem' }} onClick={goStep2}>CONTINUE TO STEP 2</button>
+              </div>
             </aside>
           </div>
-        ) : null}
+        )}
 
-        {step === 2 ? (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white shadow-xl">
-            <div className="rounded-t-3xl bg-gradient-to-r from-blue-700 to-indigo-700 p-5 text-white">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-extrabold">Select Lawyer</h2>
-                  <p className="text-sm text-blue-100">BookMyShow-style verified legal experts</p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold" onClick={() => setStep(1)}>Back</button>
-                  <button className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 disabled:opacity-50" onClick={goStep3} disabled={!selectedLawyer || loadingSlots}>
-                    {loadingSlots ? "Loading..." : "Continue"}
-                  </button>
-                </div>
+        {step === 2 && (
+          <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '32px' }}>
+              <div>
+                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>Select Legal Expert</h3>
+                <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Verified professionals assigned to your jurisdiction.</p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button className="theme-btn" style={{ border: '1px solid var(--border)' }} onClick={() => setStep(1)}>BACK</button>
+                <button className="theme-btn active" disabled={!selectedLawyer || loadingSlots} onClick={goStep3}>{loadingSlots ? "LOADING..." : "CONTINUE TO BOOKING"}</button>
               </div>
             </div>
-            <div className="p-5">
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-                {LAWYERS.map((l) => {
-                  const active = selectedLawyer?.id === l.id;
-                  const expanded = expandedLawyer === l.id;
-                  return (
-                    <article key={l.id} className={classNames("relative overflow-hidden rounded-2xl border bg-white shadow-lg transition-all hover:scale-[1.02]", active ? "border-blue-500 shadow-blue-100 ring-2 ring-blue-200" : "border-slate-200")}>
-                      {l.popular ? <span className="absolute right-3 top-3 rounded-full bg-rose-600 px-2 py-1 text-[10px] font-bold text-white">Most Popular</span> : null}
-                      <div className="bg-slate-100/80 px-4 py-5">
-                        <div className="mx-auto h-44 w-44 overflow-hidden rounded-full border-4 border-white shadow-md">
-                          <img src={resolveLawyerImage(l.photo_url, l.name)} alt={l.name} className="h-full w-full object-cover object-top" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
+              {LAWYERS.map((l) => {
+                const active = selectedLawyer?.id === l.id;
+                return (
+                  <div key={l.id} className="kpi-card" style={{ border: active ? '2px solid var(--primary)' : '1px solid var(--border)', transition: 'all 0.3s ease', opacity: (selectedLawyer && !active) ? 0.6 : 1 }} onClick={() => setSelectedLawyer(l)}>
+                    <div style={{ height: '180px', overflow: 'hidden', borderRadius: '12px 12px 0 0', position: 'relative' }}>
+                      <img src={resolveLawyerImage(l.photo_url, l.name)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 12px 12px', background: 'linear-gradient(to top, rgba(11,19,43,1), transparent)' }}>
+                        <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{l.name}</p>
+                        <p style={{ fontSize: '0.7rem', color: 'var(--primary)', letterSpacing: '0.1em' }}>{l.role.toUpperCase()}</p>
+                      </div>
+                    </div>
+                    <div style={{ padding: '16px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.6rem', color: 'var(--muted)' }}>FEE</p>
+                          <p style={{ fontWeight: 'bold', color: 'var(--primary)' }}>₹{l.fee}</p>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.6rem', color: 'var(--muted)' }}>WIN RATE</p>
+                          <p style={{ fontWeight: 'bold', color: '#4ade80' }}>{l.winPct}</p>
                         </div>
                       </div>
-                      <div className="p-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-extrabold text-slate-900">{l.name}</p>
-                            <p className="text-sm text-slate-600">{l.role}</p>
-                          </div>
-                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">{l.badge}</span>
-                        </div>
-                        <div className="mt-2 text-sm text-slate-700">⭐ {l.rating} • {l.experience} • {l.totalCases}+ cases • {l.winPct} win</div>
-                        <p className="mt-1 text-xs text-slate-500">{l.languages} • {l.courtExpertise}</p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {l.specializations.map((s) => <span key={s} className="rounded-full bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700">{s}</span>)}
-                        </div>
-                        <div className="mt-3 rounded-xl bg-blue-50 px-3 py-2 text-center">
-                          <p className="text-xs text-blue-700">Consultation Fee</p>
-                          <p className="text-lg font-extrabold text-blue-800">₹{l.fee}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedLawyer(l)}
-                          className={classNames("mt-3 w-full rounded-xl px-4 py-2.5 text-sm font-extrabold", active ? "bg-blue-600 text-white" : "bg-slate-900 text-white")}
-                        >
-                          {active ? "Selected Lawyer" : "Select Lawyer"}
-                        </button>
-                        <div className="mt-2 flex gap-2">
-                          <button className="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold" onClick={() => setExpandedLawyer(expanded ? null : l.id)}>View Full Profile</button>
-                          <button className="flex-1 rounded-lg border border-blue-200 bg-blue-50 px-2 py-1.5 text-xs font-semibold text-blue-700" onClick={() => alert("Chat will open in Messages section after case acceptance.")}>Chat Before Booking</button>
-                        </div>
-                        {expanded ? (
-                          <div className="mt-3 space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-                            <p><span className="font-bold">Education:</span> {l.education}</p>
-                            <p><span className="font-bold">Practice Areas:</span> {l.practiceAreas}</p>
-                            <p><span className="font-bold">Recent Success:</span> {l.recentCases}</p>
-                            <p><span className="font-bold">Reviews:</span> {l.reviews}</p>
-                            <p><span className="font-bold">Consultation:</span> {l.consultation.join(", ")}</p>
-                          </div>
-                        ) : null}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '8px' }}>{l.specializations.join(" • ")}</p>
+                      <button className={`theme-btn ${active ? 'active' : ''}`} style={{ width: '100%', fontSize: '0.75rem', padding: '8px' }}>{active ? "SELECTED" : "SELECT EXPERT"}</button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        ) : null}
+        )}
 
-        {step === 3 ? (
-          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl lg:col-span-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-extrabold text-slate-900">Book Time Slot</h2>
-                  <p className="text-sm text-slate-600">Choose date and time like BookMyShow.</p>
-                </div>
-                <button className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold" onClick={() => setStep(2)}>Back</button>
+        {step === 3 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
+            <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)' }}>Schedule Consultation</h3>
+                <button className="ghost-btn" onClick={() => setStep(2)}>CHANGE LAWYER</button>
               </div>
 
-              <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '32px' }}>
                 {groupedDates.map((d, idx) => {
-                  const label = idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : new Date(`${d.date}T00:00:00`).toLocaleDateString();
-                  const availCount = d.items.filter((x) => !x.is_booked).length;
                   const active = d.date === selectedDate;
                   return (
-                    <button key={d.date} className={classNames("min-w-[140px] rounded-xl border px-3 py-2 text-left", active ? "border-blue-500 bg-blue-50" : "border-slate-200 bg-white")} onClick={() => setSelectedDate(d.date)}>
-                      <p className="text-sm font-bold text-slate-800">{label}</p>
-                      <p className="text-xs text-slate-600">{d.date}</p>
-                      <p className="mt-1 text-xs font-semibold text-emerald-700">{availCount} slots available</p>
+                    <button key={d.date} className="kpi-card" style={{ minWidth: '160px', padding: '16px', cursor: 'pointer', border: active ? '2px solid var(--primary)' : '1px solid var(--border)', background: active ? 'rgba(212,175,55,0.05)' : 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedDate(d.date)}>
+                      <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : d.date}</p>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{d.items.length} Slots</p>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
-                {dateSlots.map((slot) => {
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
+                {(groupedDates.find(d => d.date === selectedDate)?.items || []).map(slot => {
                   const active = selectedSlot?.slot_time === slot.slot_time;
                   return (
-                    <button
-                      key={slot.slot_time}
-                      type="button"
-                      disabled={slot.is_booked}
-                      onClick={() => reserveSlot(slot)}
-                      className={classNames(
-                        "rounded-xl border px-3 py-3 text-sm font-bold transition",
-                        slot.is_booked ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400" : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50",
-                        active ? "border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200" : ""
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{slot.time}</span>
-                        {active ? <span>✔</span> : null}
-                      </div>
+                    <button key={slot.slot_time} disabled={slot.is_booked} onClick={() => reserveSlot(slot)} className="theme-btn" style={{ padding: '12px', border: active ? '1px solid var(--primary)' : '1px solid var(--border)', background: active ? 'var(--primary)' : slot.is_booked ? 'transparent' : 'rgba(255,255,255,0.03)', color: active ? 'var(--bg)' : slot.is_booked ? 'rgba(255,255,255,0.2)' : 'var(--text)', opacity: slot.is_booked ? 0.4 : 1 }}>
+                      {slot.time}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <aside className="space-y-4">
-              <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl">
-                <p className="text-sm font-bold text-slate-800">Selected Lawyer</p>
-                <div className="mt-2 flex items-center gap-3">
-                  <img src={resolveLawyerImage(selectedLawyer?.photo_url, selectedLawyer?.name)} alt="" className="h-11 w-11 rounded-full border border-slate-200 object-cover" />
-                  <div>
-                    <p className="font-bold text-slate-900">{selectedLawyer?.name}</p>
-                    <p className="text-xs text-slate-600">{selectedLawyer?.role}</p>
+            <aside>
+              <div className="parchment-panel" style={{ padding: '24px' }}>
+                <h4 style={{ fontFamily: 'Cinzel, serif', marginBottom: '20px' }}>Review & Submit</h4>
+                <div className="activity-item" style={{ background: 'rgba(0,0,0,0.1)', display: 'block', padding: '16px', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>SELECTED EXPERT</p>
+                  <p style={{ fontWeight: 'bold' }}>{selectedLawyer?.name}</p>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>{selectedLawyer?.role}</p>
+                </div>
+                {bookingId ? (
+                  <div className="activity-item" style={{ background: 'rgba(74,222,128,0.05)', borderColor: 'rgba(74,222,128,0.2)', display: 'block', padding: '16px' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#4ade80' }}>TIME SLOT SECURED</p>
+                    <p style={{ fontWeight: 'bold' }}>{selectedSlot?.date}</p>
+                    <p style={{ fontWeight: 'bold' }}>{selectedSlot?.time}</p>
                   </div>
-                </div>
-              </section>
-              <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl">
-                <p className="text-sm font-bold text-slate-800">Booking Status</p>
-                <div className="mt-2 text-sm text-slate-700">
-                  {bookingId ? (
-                    <>
-                      <p className="font-semibold text-emerald-700">Slot confirmed</p>
-                      <p className="mt-1">Booking ID: <span className="font-mono text-xs">{bookingId}</span></p>
-                      <p className="mt-1">Time: <span className="font-semibold">{selectedSlot?.date} {selectedSlot?.time}</span></p>
-                    </>
-                  ) : (
-                    <p>Select an available slot to continue.</p>
-                  )}
-                </div>
-                <button className="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-60" onClick={submitCase} disabled={submitting || !bookingId}>
-                  {submitting ? "Submitting..." : "Submit Case"}
+                ) : (
+                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)', textAlign: 'center', padding: '20px' }}>Select an available time slot to finalize submission.</p>
+                )}
+                <button className="theme-btn active" disabled={submitting || !bookingId} style={{ width: '100%', padding: '16px', marginTop: '24px' }} onClick={submitCase}>
+                  {submitting ? "SUBMITTING..." : "CONFIRM & FILE CASE"}
                 </button>
-              </section>
+              </div>
             </aside>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
