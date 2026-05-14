@@ -159,17 +159,29 @@ const JudicialSeal = () => (
           display: "flex", alignItems: "center", justifyContent: "center",
           borderRight: "1px solid rgba(212,175,55,0.1)",
         }}>
-          <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=2070')",
-            backgroundSize: "cover", backgroundPosition: "center",
-            opacity: 0.15, mixBlendMode: "overlay",
-            animation: "slowZoom 20s linear infinite alternate",
-          }} />
+          <img
+            src="/images/lady_justice_hero.png"
+            alt="Lady Justice"
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center top",
+              opacity: 0.45,
+              animation: "slowZoom 20s linear infinite alternate",
+            }}
+          />
           
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(circle at center, transparent 0%, rgba(8,11,26,0.8) 100%)",
+            background: "radial-gradient(circle at center, transparent 0%, rgba(8,11,26,0.6) 100%)",
+          }} />
+
+          {/* Light Sweep Effect */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+            background: "linear-gradient(to right, transparent, rgba(212,175,55,0.08), transparent)",
+            animation: "lightSweep 8s linear infinite",
+            pointerEvents: "none", zIndex: 1,
           }} />
 
           {/* Ambient Particles */}
@@ -198,6 +210,7 @@ const JudicialSeal = () => (
               lineHeight: 1.3,
               marginBottom: 12,
               letterSpacing: "0.04em",
+              textShadow: "0 0 15px rgba(212,175,55,0.3)",
             }}>
               Justice Must Remain<br />Fearless & Transparent
             </div>
