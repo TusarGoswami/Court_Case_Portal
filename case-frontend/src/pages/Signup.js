@@ -353,14 +353,14 @@ function Signup() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", objectPosition: "center top",
-              opacity: 0.75,
-              filter: "brightness(1.35) contrast(1.1)",
+              opacity: 0.68,
+              filter: "brightness(1.08) contrast(1.12) saturate(0.92)",
               animation: "heroFloat 20s ease-in-out infinite",
             }}
           />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(3,6,15,0.05) 0%, rgba(3,6,15,0.3) 40%, rgba(3,6,15,0.85) 100%)",
+            background: "linear-gradient(180deg, rgba(3,6,15,0.28) 0%, rgba(3,6,15,0.42) 35%, rgba(3,6,15,0.88) 100%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
@@ -495,14 +495,14 @@ function Signup() {
                 }}>
                   DIGITAL JUDICIAL<br />ENROLLMENT
                 </h1>
-                
+
                 <div style={{
                   height: 3, width: 60, background: "linear-gradient(90deg, #D4AF37, transparent)",
                   transformOrigin: "left",
                   animation: mounted ? "lineDraw 0.8s 0.6s ease both" : "none",
                   transform: "scaleX(0)", marginBottom: 12,
                 }} />
-                
+
                 <p style={{ color: "#3A4D60", fontSize: "0.88rem", lineHeight: 1.6, fontWeight: 500 }}>
                   Formal identity verification for authorized practitioners and registry access.
                 </p>
@@ -625,8 +625,8 @@ function Signup() {
                               style={{
                                 position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
                                 background: "none", border: "none", cursor: "pointer",
-                                color: "rgba(212,175,55,0.5)", fontSize: "0.9rem", 
-                                width: "34px", height: "34px", display: "flex", 
+                                color: "rgba(212,175,55,0.5)", fontSize: "0.9rem",
+                                width: "34px", height: "34px", display: "flex",
                                 alignItems: "center", justifyContent: "center",
                                 zIndex: 5, padding: 0
                               }}>

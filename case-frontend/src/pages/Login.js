@@ -367,7 +367,7 @@ function Login() {
           {/* multi-layer gradient */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(3,6,15,0.05) 0%, rgba(3,6,15,0.3) 45%, rgba(3,6,15,0.9) 100%)",
+            background: "linear-gradient(180deg, rgba(3,6,15,0.28) 0%, rgba(3,6,15,0.42) 35%, rgba(3,6,15,0.88) 100%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
