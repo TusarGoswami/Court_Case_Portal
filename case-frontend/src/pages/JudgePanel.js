@@ -1280,7 +1280,6 @@ function JudgePanel() {
               </div>
             ) : renderSection()}
           </div>
-        </main>
         </div>
       </main>
     </div>
