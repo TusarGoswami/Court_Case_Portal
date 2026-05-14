@@ -180,15 +180,22 @@ const JudicialSeal = () => (
 
         .password-toggle {
            position: absolute;
-           right: 14px;
+           right: 10px;
+           top: 50%;
+           transform: translateY(-50%);
            background: none;
            border: none;
            color: #5A6A7A;
            cursor: pointer;
-           font-size: 0.7rem;
-           font-weight: 700;
-           letter-spacing: 0.05em;
-           transition: color 0.3s;
+           font-size: 1rem;
+           transition: all 0.3s;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 10;
+           padding: 4px;
+           width: 32px;
+           height: 32px;
         }
 
         .password-toggle:hover {
@@ -443,20 +450,28 @@ const JudicialSeal = () => (
                   <div>
                     <label style={lbl}>Password</label>
                     <div className="input-group">
-                      <input className="cinematic-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                      <input className="cinematic-input" 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••"
+                        style={{ paddingRight: 48 }}
                         value={form.password}
                         onFocus={() => setFocusedField("pw")} onBlur={() => setFocusedField(null)}
                         onChange={(e) => setForm({ ...form, password: e.target.value })} />
                       <div className="input-icon-wrapper"><Icon type="lock" /></div>
-                      <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? "HIDE" : "SHOW"}
+                      <button type="button" className="password-toggle" 
+                        style={{ userSelect: "none" }}
+                        onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? "👁️" : "🙈"}
                       </button>
                     </div>
                   </div>
                   <div>
                     <label style={lbl}>Verification</label>
                     <div className="input-group">
-                      <input className="cinematic-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                      <input className="cinematic-input" 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••"
+                        style={{ paddingRight: 48 }}
                         value={form.password_confirmation}
                         onFocus={() => setFocusedField("cpw")} onBlur={() => setFocusedField(null)}
                         onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })} />
