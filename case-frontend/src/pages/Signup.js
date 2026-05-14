@@ -471,23 +471,45 @@ function Signup() {
               animation: mounted ? "revealUp 0.8s 0.35s ease both" : "none", opacity: 0,
             }}>
               {/* Header */}
-              <div style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: "0.68rem", color: "#D4AF37", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 8, opacity: 0.7 }}>
-                  Registry Enrollment
-                </p>
-                <h1 style={{
-                  fontFamily: "'Cinzel', serif", fontSize: "clamp(1.4rem,2.5vw,1.9rem)",
-                  color: "#FFFFFF", fontWeight: 900, letterSpacing: "0.04em", marginBottom: 8,
-                }}>Create Your Profile</h1>
+              <div style={{ marginBottom: 32 }}>
+                {/* Authority Badge */}
                 <div style={{
-                  height: 2, width: 44, background: "linear-gradient(90deg, #D4AF37, transparent)",
+                  display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
+                  padding: "6px 14px", borderRadius: 8,
+                  background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)",
+                  width: "fit-content"
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                  </svg>
+                  <span style={{ fontSize: "0.62rem", color: "#D4AF37", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700 }}>
+                    Government Authorization Active
+                  </span>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#D4AF37", animation: "pulse 2s infinite" }} />
+                </div>
+
+                <h1 style={{
+                  fontFamily: "'Cinzel', serif", fontSize: "clamp(1.5rem,2.8vw,2.1rem)",
+                  color: "#FFFFFF", fontWeight: 900, letterSpacing: "0.06em", marginBottom: 10,
+                  lineHeight: 1.1, textShadow: "0 4px 12px rgba(0,0,0,0.3)"
+                }}>
+                  DIGITAL JUDICIAL<br />ENROLLMENT
+                </h1>
+                
+                <div style={{
+                  height: 3, width: 60, background: "linear-gradient(90deg, #D4AF37, transparent)",
                   transformOrigin: "left",
-                  animation: mounted ? "lineDraw 0.6s 0.7s ease both" : "none",
-                  transform: "scaleX(0)", marginBottom: 10,
+                  animation: mounted ? "lineDraw 0.8s 0.6s ease both" : "none",
+                  transform: "scaleX(0)", marginBottom: 12,
                 }} />
-                <p style={{ color: "#3A4D60", fontSize: "0.84rem", lineHeight: 1.6 }}>
-                  Establish your digital credentials in the ECMS ecosystem.
+                
+                <p style={{ color: "#3A4D60", fontSize: "0.88rem", lineHeight: 1.6, fontWeight: 500 }}>
+                  Formal identity verification for authorized practitioners and registry access.
                 </p>
+                <div style={{ marginTop: 6, fontSize: "0.7rem", color: "rgba(212,175,55,0.4)", display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 30, height: 1, background: "currentColor" }} />
+                  SECURE VERIFICATION SYSTEM ENABLED
+                </div>
               </div>
 
               {/* Step indicator */}
