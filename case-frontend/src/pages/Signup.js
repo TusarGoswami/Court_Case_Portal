@@ -496,7 +496,7 @@ function Signup() {
               {/* Glass form card */}
               <div style={{
                 position: "relative", borderRadius: 16,
-                background: "rgba(8,14,28,0.35)",
+                background: "linear-gradient(180deg, rgba(10,16,30,0.48), rgba(8,14,28,0.32))",
                 border: "1px solid rgba(212,175,55,0.1)",
                 padding: "28px 24px",
                 backdropFilter: "blur(20px)",
