@@ -104,31 +104,7 @@ const AnimatedSeal = () => (
   </svg>
 );
 
-/* ─── Magnetic Button ─── */
-const MagneticBtn = ({ children, onClick, type = "button", style: extraStyle }) => {
-  const ref = useRef(null);
-  const handleMove = (e) => {
-    const btn = ref.current;
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = "translate(0,0)";
-  };
-  const handleLeave = () => {
-    if (ref.current) ref.current.style.transform = "translate(0,0)";
-  };
-  return (
-    <button ref={ref} type={type} onMouseMove={handleMove} onMouseLeave={handleLeave}
-      onClick={onClick}
-      style={{
-        transition: "transform 0.3s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s",
-        ...extraStyle,
-      }}>
-      {children}
-    </button>
-  );
-};
+
 
 /* ─── Text Scramble Hook ─── */
 const useScramble = (text, trigger) => {
@@ -151,7 +127,7 @@ const useScramble = (text, trigger) => {
 
 function Login() {
   const navigate = useNavigate();
-  const [focusedField, setFocusedField] = useState(null);
+  const [, setFocusedField] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [titleVisible, setTitleVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -179,7 +155,7 @@ function Login() {
     }
   };
 
-  const isFocused = (f) => focusedField === f;
+
 
   return (
     <>

@@ -102,7 +102,7 @@ function Signup() {
   const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formStep, setFormStep] = useState(0); // 0 = personal, 1 = credentials
-  const [focusedField, setFocusedField] = useState(null);
+  const [, setFocusedField] = useState(null);
 
   const [form, setForm] = useState({
     name: "", email: "", phone: "", password: "",
@@ -129,11 +129,7 @@ function Signup() {
     }
   };
 
-  const SVGIcon = ({ path, path2 }) => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d={path} />{path2 && <path d={path2} />}
-    </svg>
-  );
+
 
   return (
     <>

@@ -66,8 +66,7 @@ const FILTERS = [
   { id: "Closed", label: "Closed" },
 ];
 
-const WORKFLOW_LEGEND =
-  "Filed → Verified → Accepted → Assigned to Judge → Hearing Scheduled → Judgment Pending → Closed";
+
 
 /** Fallback when roster API has not been seeded yet — matches Justice Sunderlal Tripathi copy. */
 const TRIPATHI_PROFILE_FALLBACK = {
@@ -134,16 +133,7 @@ function resolveAssetUrl(url) {
   return `${BACKEND_BASE}${clean}`;
 }
 
-/** Serves static files from the React `public` folder (e.g. /images/...). */
-function publicAssetUrl(url) {
-  if (!url) return "";
-  if (/^https?:\/\//i.test(url)) return url;
-  const clean = url.startsWith("/") ? url : `/${url}`;
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}${clean}`;
-  }
-  return clean;
-}
+
 
 function toLocalDateTimeInput(value) {
   if (!value) return "";
@@ -262,7 +252,7 @@ function JudgePanel() {
   const [remarkDrafts, setRemarkDrafts] = useState({});
   const [hearingDrafts, setHearingDrafts] = useState({});
   const [benchBusy, setBenchBusy] = useState(null);
-  const [lastSynced, setLastSynced] = useState(null);
+
 
 
   useEffect(() => {
@@ -295,7 +285,7 @@ function JudgePanel() {
       setNotifications(notificationsRes.data?.data || []);
       setStats(reportRes.data?.stats || null);
       setMessages(contactsRes.data?.data || []);
-      setLastSynced(new Date());
+
     } catch {
       setCourtCases([]);
       setAssignWarning("Could not load judge roster. Check session and API.");

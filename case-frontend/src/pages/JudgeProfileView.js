@@ -48,7 +48,7 @@ function JudgeProfileView() {
   const location = useLocation();
   const [judge, setJudge] = useState(location.state?.judge || null);
   const [loading, setLoading] = useState(!judge);
-  const [error, setError] = useState("");
+  const [_error, setError] = useState(""); // eslint-disable-line no-unused-vars
 
   useEffect(() => {
     if (!judge) {

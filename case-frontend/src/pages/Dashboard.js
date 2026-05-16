@@ -432,7 +432,7 @@ function Dashboard() {
     }
   };
 
-  const isImageUrl = (url) => /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(url || "");
+
   const currentAvatar = resolveAssetUrl(user?.photo_url) || "https://i.pravatar.cc/80?img=13";
 
   useEffect(() => {
@@ -546,7 +546,8 @@ function Dashboard() {
         const s = (c.status || "").toLowerCase();
         return s === "closed" || activeBenchStatuses.includes(s);
       }),
-    [cases]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cases, activeBenchStatuses]
   );
   const filteredAssignedCases = useMemo(() => {
     const sNorm = (c) => (c.status || "").toLowerCase();
