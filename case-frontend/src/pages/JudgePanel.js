@@ -49,7 +49,17 @@ function FilingParticles() {
 
 function FilingJudicialSeal() {
   return (
-    <div className="dash-seal-container" style={{ opacity: 0.04 }}>
+    <div className="dash-seal-container" style={{ 
+      position: 'fixed', 
+      top: '50%', 
+      left: '50%', 
+      transform: 'translate(-50%, -50%)', 
+      width: '600px', 
+      height: '600px', 
+      opacity: 0.04, 
+      pointerEvents: 'none',
+      zIndex: 0 
+    }}>
       <svg viewBox="0 0 200 200" className="dash-seal-svg">
         <path fill="currentColor" d="M100,20 L120,60 L160,60 L130,90 L140,130 L100,110 L60,130 L70,90 L40,60 L80,60 Z" />
         <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="10 5" />
@@ -600,7 +610,7 @@ function JudgePanel() {
           Select a matter to open the consolidated file.
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid-2">
           <div className="space-y-6">
             <div className="cinematic-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '20px' }}>
               <h4 className="text-xs font-bold tracking-[0.2em] text-amber-500 mb-4 uppercase">Parties & Jurisdiction</h4>
@@ -819,7 +829,7 @@ function JudgePanel() {
         ))}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
+      <div className="grid-2" style={{ gridTemplateColumns: '1fr 350px' }}>
         <div className="space-y-8">
           {renderAssignedTable()}
           {selectedCase ? renderCaseDetail() : (
@@ -919,7 +929,7 @@ function JudgePanel() {
     const backlogPct = 100 - resolvedPct;
 
     return (
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid-2">
         <section className="cinematic-card">
           <h2 className="mb-6 text-xl font-bold tracking-widest text-amber-500 uppercase" style={{ fontFamily: 'Cinzel, serif' }}>DISPOSITION METRICS</h2>
           <div className="space-y-8">
