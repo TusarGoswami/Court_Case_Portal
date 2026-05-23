@@ -611,7 +611,13 @@ function Dashboard() {
       {gavelKey && <div key={gavelKey} style={{ position: "fixed", top: "40%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 80, pointerEvents: "none" }}><span className="gavel-strike-anim" style={{ fontSize: "4rem" }}>⚖️</span></div>}
 
       <aside className="dashboard-sidebar">
-        <div className="dashboard-logo">E-COURT</div>
+        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', padding: '10px 12px', marginBottom: '10px' }}>
+          <img src="/images/logo-emblem.png" alt="E-Court" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontFamily: "'Cinzel', serif", fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.06em', color: 'var(--primary)', lineHeight: 1.1 }}>E-COURT</span>
+            <span style={{ fontSize: '0.55rem', letterSpacing: '0.15em', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>Portal System</span>
+          </div>
+        </div>
 
         <button className="sidebar-shortcut" onClick={() => setCmdPaletteOpen(true)}>
           <span>🔍 Quick Search <kbd>Ctrl+K</kbd></span>

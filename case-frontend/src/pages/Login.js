@@ -438,11 +438,16 @@ function Login() {
             borderBottom: "1px solid rgba(212,175,55,0.06)",
           }}>
             <span style={{ fontSize: "0.72rem", color: "#2A3A4A", letterSpacing: "0.04em" }}>support@ecourt.gov.in</span>
-            <span style={{
-              fontFamily: "'Cinzel', serif", color: "#D4AF37",
-              fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.18em",
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
               animation: mounted ? "logoReveal 1s 0.3s ease both" : "none", opacity: 0,
-            }}>E-COURT</span>
+            }}>
+              <img src="/images/logo-emblem.png" alt="" style={{ width: "20px", height: "20px", objectFit: "contain" }} />
+              <span style={{
+                fontFamily: "'Cinzel', serif", color: "#D4AF37",
+                fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.18em",
+              }}>E-COURT</span>
+            </div>
           </div>
 
           {/* Form centered */}

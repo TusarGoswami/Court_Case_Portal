@@ -273,9 +273,12 @@ export default function CreateCase() {
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px', position: 'relative', zIndex: 5 }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <div>
-            <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: '2.5rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>DIGITAL CASE FILING</h1>
-            <p style={{ color: 'var(--muted)', letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase' }}>Judicial Submission Portal — Citizen Service</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <img src="/images/logo-emblem.png" alt="E-Court Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: '2.5rem', color: 'var(--primary)', letterSpacing: '0.05em', margin: 0, lineHeight: 1.1 }}>DIGITAL CASE FILING</h1>
+              <p style={{ color: 'var(--muted)', letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase', margin: '4px 0 0 0' }}>Judicial Submission Portal — Citizen Service</p>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button className="ghost-btn" style={{ color: 'var(--text)', opacity: 0.7 }} onClick={() => navigate("/dashboard")}>← BACK TO DASHBOARD</button>

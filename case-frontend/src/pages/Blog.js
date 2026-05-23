@@ -526,16 +526,19 @@ export default function Blog() {
         {/* ── Header ── */}
         <header style={{ marginBottom: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-            <div>
-              <h1 style={{
-                fontFamily: "'Cinzel', serif", fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
-                color: 'var(--primary)', letterSpacing: '0.05em', marginBottom: '4px',
-              }}>
-                LEGAL RESOURCES
-              </h1>
-              <p style={{ color: 'var(--muted)', fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                Expert insights · Legal guides · Judiciary updates
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <img src="/images/logo-emblem.png" alt="E-Court Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+              <div>
+                <h1 style={{
+                  fontFamily: "'Cinzel', serif", fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
+                  color: 'var(--primary)', letterSpacing: '0.05em', margin: 0, lineHeight: 1.1
+                }}>
+                  LEGAL RESOURCES
+                </h1>
+                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '4px 0 0 0' }}>
+                  Expert insights · Legal guides · Judiciary updates
+                </p>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               {canWrite && (

@@ -79,9 +79,12 @@ function JudgeProfileView() {
         <div className="mx-auto max-w-6xl relative z-10">
           <header style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, alignItems: 'center', marginBottom: '40px' }}>
             <button className="ghost-btn" onClick={() => navigate(-1)}>← RETURN TO ROSTER</button>
-            <div className="text-right">
-              <div style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', letterSpacing: '2px' }}>JUDICIAL COMMISSION</div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '4px' }}>OFFICIAL PUBLIC RECORD</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'right' }}>
+              <div className="text-right">
+                <div style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', letterSpacing: '2px', lineHeight: 1.1 }}>JUDICIAL COMMISSION</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '4px', marginTop: '2px' }}>OFFICIAL PUBLIC RECORD</div>
+              </div>
+              <img src="/images/logo-emblem.png" alt="E-Court Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
             </div>
           </header>
 

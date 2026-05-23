@@ -1213,11 +1213,12 @@ function JudgePanel() {
       <FilingJudicialSeal />
       
       <aside className="dashboard-sidebar">
-        <div className="dashboard-logo">
-          <div className="text-xl font-bold tracking-[0.2em] text-white" style={{ fontFamily: 'Cinzel, serif' }}>
-            E-COURT
+        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', padding: '10px 12px', marginBottom: '10px' }}>
+          <img src="/images/logo-emblem.png" alt="E-Court" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontFamily: "'Cinzel', serif", fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.06em', color: 'var(--primary)', lineHeight: 1.1 }}>E-COURT</span>
+            <span style={{ fontSize: '0.55rem', letterSpacing: '0.15em', color: '#D4AF37', fontWeight: 700, textTransform: 'uppercase' }}>Judicial Bench</span>
           </div>
-          <div className="text-[0.5rem] tracking-[0.2em] text-amber-500/80 font-bold">JUDICIAL BENCH</div>
         </div>
         
         <nav className="dashboard-menu">

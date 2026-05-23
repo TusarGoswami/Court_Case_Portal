@@ -69,9 +69,12 @@ export default function ProfileSettings() {
       
       <div className="panel" style={{ width: 'min(500px, 95vw)', background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(16px)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div>
-            <h1 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>PROFILE SETTINGS</h1>
-            <p style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>Judicial identity & digital avatar</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img src="/images/logo-emblem.png" alt="E-Court Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem', margin: 0, lineHeight: 1.1 }}>PROFILE SETTINGS</h1>
+              <p style={{ color: 'var(--muted)', fontSize: '0.8rem', margin: '2px 0 0 0' }}>Judicial identity & digital avatar</p>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="ghost-btn" onClick={() => navigate("/dashboard")}>← BACK</button>
