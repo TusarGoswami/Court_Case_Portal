@@ -1070,11 +1070,12 @@ a {
   font-size: inherit;
   font-family: inherit;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .kpi-card button.kpi-detail-link:hover {
-  color: #1d4ea8;
+  text-decoration: underline;
+  color: var(--primary);
 }
 
 .dashboard-table-panel {
