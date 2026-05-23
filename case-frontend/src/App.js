@@ -6,6 +6,7 @@ import CreateCase from "./pages/CreateCase";
 import ProfileSettings from "./pages/ProfileSettings";
 import JudgePanel from "./pages/JudgePanel";
 import JudgeProfileView from "./pages/JudgeProfileView";
+import Blog from "./pages/Blog";
 import { Navigate } from "react-router-dom";
 import { getDefaultRouteForRole, getStoredToken, getStoredUser } from "./services/auth";
 
@@ -62,6 +63,14 @@ function App() {
           element={
             <ProtectedRoute>
               <JudgeProfileView />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <ProtectedRoute>
+              <Blog />
             </ProtectedRoute>
           }
         />

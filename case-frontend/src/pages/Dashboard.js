@@ -634,6 +634,7 @@ function Dashboard() {
               { label: "Documents", icon: "📄" }
             ] : []),
             { label: "Messages", icon: "💬" },
+            { label: "Legal Blog", icon: "📝" },
             { label: "Profile Settings", icon: "⚙️" },
             { label: "Logout", icon: "🚪" }
           ].map((item) => (
@@ -643,6 +644,7 @@ function Dashboard() {
               onClick={() => {
                 if (item.label === "Profile Settings") navigate("/profile");
                 else if (item.label === "Logout") handleLogout();
+                else if (item.label === "Legal Blog") navigate("/blog");
                 else setActiveMenu(item.label);
               }}
             >

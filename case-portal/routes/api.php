@@ -14,6 +14,7 @@ use App\Http\Controllers\JudgeController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\JudgeCaseController;
+use App\Http\Controllers\BlogController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -57,4 +58,12 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/video/token', [VideoController::class, 'token'])->middleware('role:judge,admin,clerk');
 
     Route::get('/reports/dashboard', [ReportController::class, 'dashboard'])->middleware('role:admin,judge,clerk');
+
+    // Blog / Legal Resources
+    Route::get('/blogs', [BlogController::class, 'index']);
+    Route::get('/blogs/my-posts', [BlogController::class, 'myPosts']);
+    Route::get('/blogs/{slug}', [BlogController::class, 'show']);
+    Route::post('/blogs', [BlogController::class, 'store'])->middleware('role:lawyer,admin,judge');
+    Route::put('/blogs/{id}', [BlogController::class, 'update'])->middleware('role:lawyer,admin,judge');
+    Route::delete('/blogs/{id}', [BlogController::class, 'destroy'])->middleware('role:lawyer,admin,judge');
 });

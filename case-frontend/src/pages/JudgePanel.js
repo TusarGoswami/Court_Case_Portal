@@ -27,6 +27,7 @@ const navItems = [
   { label: "Judgments", icon: "📜" },
   { label: "Calendar", icon: "🗓️" },
   { label: "Messages", icon: "💬" },
+  { label: "Legal Blog", icon: "📝" },
   { label: "Settings", icon: "⚙️" },
   { label: "Logout", icon: "🚪" }
 ];
@@ -1224,7 +1225,11 @@ function JudgePanel() {
             <button
               key={item.label}
               type="button"
-              onClick={() => (item.label === "Logout" ? logout() : setActiveNav(item.label))}
+              onClick={() => {
+                if (item.label === "Logout") logout();
+                else if (item.label === "Legal Blog") navigate("/blog");
+                else setActiveNav(item.label);
+              }}
               className={`menu-item ${activeNav === item.label ? 'active' : ''}`}
             >
               <i>{item.icon}</i>
