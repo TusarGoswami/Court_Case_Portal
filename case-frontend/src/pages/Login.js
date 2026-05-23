@@ -607,7 +607,7 @@ function Login() {
             borderTop: "1px solid rgba(212,175,55,0.05)",
             fontSize: "0.7rem", color: "#1A2535",
           }}>
-            <span>© 2024 E-Court Management System</span>
+            <span>© 2026 E-Court Management System</span>
             <div style={{ display: "flex", gap: 14 }}>
               {["Privacy Policy", "Terms", "Help"].map(t => (
                 <span key={t} style={{ cursor: "pointer", transition: "color 0.2s" }}
