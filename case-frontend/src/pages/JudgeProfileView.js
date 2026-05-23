@@ -88,7 +88,7 @@ function JudgeProfileView() {
             </div>
           </header>
 
-          <div className="grid gap-10 lg:grid-cols-[320px_1fr]">
+          <div className="grid-cols-1 lg:grid-cols-[320px_1fr] gap-10" style={{ display: 'grid' }}>
             {/* Sidebar */}
             <aside className="space-y-6">
               <div className="cinematic-card" style={{ padding: '8px', border: '1px solid var(--primary)' }}>
@@ -104,7 +104,7 @@ function JudgeProfileView() {
                  <p style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold', marginTop: '4px' }}>{judge?.position || "SENIOR JUDGE"}</p>
                  <p className="muted-text" style={{ fontSize: '0.75rem' }}>{judge?.court}</p>
 
-                 <div className="grid grid-cols-2 gap-4 mt-8">
+                 <div className="grid-cols-2 gap-4 mt-8" style={{ display: 'grid' }}>
                     <div className="cinematic-card" style={{ padding: '12px', textAlign: 'center' }}>
                        <div className="text-xl font-bold text-white">{judge?.experience_label?.split(' ')[0] || "25"}</div>
                        <div className="muted-text text-[0.5rem] font-bold tracking-widest uppercase">EXPERIENCE</div>
@@ -149,7 +149,7 @@ function JudgeProfileView() {
                 {judge?.professional_highlights && (
                   <section>
                     <h3 style={{ fontFamily: 'Cinzel, serif', fontSize: '1.2rem', color: '#5d4037', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '8px', marginBottom: '20px' }}>PROFESSIONAL TENURE</h3>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid-cols-1 md:grid-cols-2 gap-4" style={{ display: 'grid' }}>
                       {judge.professional_highlights.map((item, idx) => (
                         <div key={idx} style={{ padding: '16px', background: 'rgba(0,0,0,0.03)', borderRadius: '8px', fontSize: '0.9rem' }}>• {item}</div>
                       ))}
