@@ -571,6 +571,7 @@ export default function Blog() {
               className="status-pill"
               style={{
                 cursor: 'pointer', padding: '6px 16px', fontSize: '0.75rem',
+                width: 'auto',
                 background: activeCategory === cat.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
                 color: activeCategory === cat.id ? '#0B132B' : 'var(--muted)',
                 fontWeight: activeCategory === cat.id ? '800' : '500',
@@ -589,6 +590,7 @@ export default function Blog() {
               onClick={() => setSortBy("latest")}
               style={{
                 cursor: 'pointer', fontSize: '0.7rem', padding: '4px 12px',
+                width: 'auto',
                 background: sortBy === "latest" ? 'rgba(212,175,55,0.15)' : 'transparent',
                 color: sortBy === "latest" ? '#D4AF37' : 'var(--muted)',
                 border: '1px solid var(--border)',
@@ -601,6 +603,7 @@ export default function Blog() {
               onClick={() => setSortBy("popular")}
               style={{
                 cursor: 'pointer', fontSize: '0.7rem', padding: '4px 12px',
+                width: 'auto',
                 background: sortBy === "popular" ? 'rgba(212,175,55,0.15)' : 'transparent',
                 color: sortBy === "popular" ? '#D4AF37' : 'var(--muted)',
                 border: '1px solid var(--border)',
