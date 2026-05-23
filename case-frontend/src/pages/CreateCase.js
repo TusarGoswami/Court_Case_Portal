@@ -127,10 +127,10 @@ const LAWYERS = [
   { id: "jagdishwar", name: "Jagdishwar Mishra", role: "Senior Advocate", photo_url: "/images/Jagdishwar_Mishra.png", fee: 999, rating: 4.9, experience: "15+ yrs", totalCases: 1200, winPct: "84%", specializations: ["Criminal", "Constitutional"], education: "LL.M, NLU" },
   { id: "jagdish", name: "Jagdish Tyagi", role: "Advocate", photo_url: "/images/Jagdish_Tyagi.png", fee: 1499, rating: 4.7, experience: "10+ yrs", totalCases: 940, winPct: "80%", specializations: ["Civil", "Consumer"], education: "LL.B, DU" },
   { id: "rahman", name: "Rahman Dakaait", role: "Criminal Expert", photo_url: "/images/Rahman_Dakaait.png", fee: 1999, rating: 4.8, experience: "12+ yrs", totalCases: 1100, winPct: "82%", specializations: ["Criminal", "Fraud"], education: "LL.M, AMU", popular: true },
-  { id: "tushar", name: "Tushar", role: "Junior Advocate", photo_url: "/images/Tushar.png", fee: 2499, rating: 4.5, experience: "3+ yrs", totalCases: 210, winPct: "74%", specializations: ["Research", "Drafting"], education: "B.A. LL.B" },
+  { id: "tusar", name: "Tusar Goswami", role: "Junior Advocate", photo_url: "/images/Tushar.png", fee: 2499, rating: 4.5, experience: "3+ yrs", totalCases: 210, winPct: "74%", specializations: ["Research", "Drafting"], education: "B.A. LL.B" },
 ];
 
-function resolveLawyerImage(pathOrUrl, fallbackName = "Tushar") {
+function resolveLawyerImage(pathOrUrl, fallbackName = "Tusar") {
   if (!pathOrUrl) return `${BACKEND_BASE}/images/${encodeURIComponent(fallbackName)}.png`;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
   const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
