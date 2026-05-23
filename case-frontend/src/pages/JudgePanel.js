@@ -238,7 +238,7 @@ function JudgePanel() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [theme, setTheme] = useState(localStorage.getItem("data-theme") || "midnight");
-  const darkMode = theme === "midnight";
+  const darkMode = theme === "midnight" || theme === "chambers" || theme === "classic";
   
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -264,8 +264,28 @@ function JudgePanel() {
   const [remarkDrafts, setRemarkDrafts] = useState({});
   const [hearingDrafts, setHearingDrafts] = useState({});
   const [benchBusy, setBenchBusy] = useState(null);
+  const [evidenceStatuses, setEvidenceStatuses] = useState(() => {
+    try {
+      const stored = localStorage.getItem("evidence_statuses");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
 
-
+  const handleEvidenceAction = (docUrl, action) => {
+    if (!selectedCase?.id) return;
+    const docKey = `${selectedCase.id}_${docUrl}`;
+    setEvidenceStatuses(prev => {
+      const updated = { ...prev, [docKey]: prev[docKey] === action ? null : action };
+      try {
+        localStorage.setItem("evidence_statuses", JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
 
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 1000);
@@ -746,25 +766,67 @@ function JudgePanel() {
           <p className={subtle}>No cryptographic exhibits attached to this dossier.</p>
         ) : (
           <div className="grid gap-3">
-            {rows.map((doc, idx) => (
-              <div key={`${doc.url}-${idx}`} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 ${darkMode ? "border-stone-700" : "border-stone-200"}`}>
-                <div>
-                  <p className="font-semibold">{doc.title}</p>
-                  <p className={`text-xs ${subtle}`}>Checksum verified · audit trail retained</p>
+            {rows.map((doc, idx) => {
+              const docKey = `${selectedCase.id}_${doc.url}`;
+              const docStatus = evidenceStatuses[docKey]; // 'accepted' | 'rejected'
+
+              return (
+                <div 
+                  key={`${doc.url}-${idx}`} 
+                  className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 transition-all duration-300 ${
+                    docStatus === 'accepted' 
+                      ? "border-emerald-500/50 bg-emerald-500/5" 
+                      : docStatus === 'rejected'
+                      ? "border-rose-500/50 bg-rose-500/5"
+                      : darkMode ? "border-stone-700" : "border-stone-200"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{doc.title}</p>
+                      {docStatus === 'accepted' && (
+                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[0.65rem] font-bold text-emerald-400 border border-emerald-500/30">
+                          ACCEPTED ✅
+                        </span>
+                      )}
+                      {docStatus === 'rejected' && (
+                        <span className="rounded bg-rose-500/20 px-2 py-0.5 text-[0.65rem] font-bold text-rose-400 border border-rose-500/30">
+                          REJECTED ❌
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs ${subtle}`}>Checksum verified · audit trail retained</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <a className={`!inline-flex rounded-lg px-3 py-1 text-xs font-semibold ${goldBtn}`} href={resolveAssetUrl(doc.url)} target="_blank" rel="noreferrer">
+                      Open
+                    </a>
+                    <button 
+                      type="button" 
+                      onClick={() => handleEvidenceAction(doc.url, 'accepted')}
+                      className={`!w-auto rounded-lg px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                        docStatus === 'accepted'
+                          ? "bg-emerald-500 text-stone-900 border border-emerald-500"
+                          : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      Accept
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => handleEvidenceAction(doc.url, 'rejected')}
+                      className={`!w-auto rounded-lg px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                        docStatus === 'rejected'
+                          ? "bg-rose-500 text-stone-900 border border-rose-500"
+                          : "border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                      }`}
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <a className={`!inline-flex rounded-lg px-3 py-1 text-xs font-semibold ${goldBtn}`} href={resolveAssetUrl(doc.url)} target="_blank" rel="noreferrer">
-                    Open
-                  </a>
-                  <button type="button" className={`!w-auto rounded-lg px-3 py-1 text-xs ${darkMode ? "border border-emerald-700 bg-emerald-900/40" : "border border-emerald-200 bg-emerald-50"}`}>
-                    Accept
-                  </button>
-                  <button type="button" className={`!w-auto rounded-lg px-3 py-1 text-xs ${darkMode ? "border border-rose-800 bg-rose-950/50" : "border border-rose-200 bg-rose-50"}`}>
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         <p className={`mt-4 text-xs ${subtle}`}>Chain-of-custody logging and encryption wrappers follow registry policy SOC-2 baseline.</p>
@@ -1239,13 +1301,22 @@ function JudgePanel() {
           ))}
         </nav>
 
-        <div className="theme-switcher">
-           <button 
-            onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
-            className="theme-btn active"
-            style={{ width: '100%', fontSize: '0.7rem' }}
+        <div className="theme-switcher" style={{ display: 'flex', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+          <button 
+            className={`theme-btn ${theme === "midnight" ? "active" : ""}`} 
+            onClick={() => setTheme("midnight")}
+            title="Midnight Theme"
+            style={{ flex: 1, padding: '8px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px' }}
           >
-            {theme === 'midnight' ? '🌙' : '🏛️'}
+            🌙
+          </button>
+          <button 
+            className={`theme-btn ${theme === "chambers" ? "active" : ""}`} 
+            onClick={() => setTheme("chambers")}
+            title="Chambers Theme"
+            style={{ flex: 1, padding: '8px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px' }}
+          >
+            🌿
           </button>
         </div>
       </aside>
