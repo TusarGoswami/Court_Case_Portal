@@ -476,16 +476,24 @@ function JudgePanel() {
     }
     try {
       setBenchBusy(row.id);
-      await api.patch(`/judge/court-cases/${row.id}`, { status });
-      await loadDashboard();
+      // Fire API request in background
+      const updatePromise = api.patch(`/judge/court-cases/${row.id}`, { status });
       
+      // Optimistically update local courtCases list state for instant feedback
+      setCourtCases(prev => prev.map(c => c.id === row.id ? { ...c, status, workflow_label: status.toUpperCase() } : c));
+      
+      // Render success toast immediately
       let msg = `Case status updated to ${status.toUpperCase()}.`;
       if (status === 'accepted') msg = "Case is assigned to Judge successfully.";
-      else if (status === 'verified') msg = "Case is verified successfully.";
+      else if (status === 'verified') msg = "Case is verified and authenticated.";
       else if (status === 'judgment_pending' || status === 'judgment_reserved') msg = "Judgment is reserved. Case updated to judgment pending.";
       else if (status === 'closed') msg = "Case is closed successfully.";
       showToast(msg, 'success');
+
+      await updatePromise;
+      loadDashboard();
     } catch (e) {
+      loadDashboard();
       showToast(e?.response?.data?.message || "Bench update failed", 'error');
     } finally {
       setBenchBusy(null);
@@ -515,7 +523,8 @@ function JudgePanel() {
 
     try {
       setBenchBusy(row.id);
-      await api.patch(`/judge/court-cases/${row.id}`, {
+      // Fire API request in background
+      const updatePromise = api.patch(`/judge/court-cases/${row.id}`, {
         status: "hearing_scheduled",
         title: draft.title?.trim() || `Hearing - ${row.case_number}`,
         agenda: draft.agenda?.trim() || "",
@@ -524,10 +533,17 @@ function JudgePanel() {
         location: draft.location?.trim() || "",
         meeting_link: draft.meeting_link?.trim() || "",
       });
-      await loadDashboard();
-      setActiveNav("Hearings");
+
+      // Optimistically update local courtCases list
+      setCourtCases(prev => prev.map(c => c.id === row.id ? { ...c, status: "hearing_scheduled", slot_time: new Date(draft.scheduled_at).toISOString() } : c));
+      
       showToast("Hearing is scheduled successfully. Counsel and clerk have been notified.", 'success');
+      setActiveNav("Hearings");
+
+      await updatePromise;
+      loadDashboard();
     } catch (e) {
+      loadDashboard();
       showToast(e?.response?.data?.message || "Hearing scheduling failed", 'error');
     } finally {
       setBenchBusy(null);
