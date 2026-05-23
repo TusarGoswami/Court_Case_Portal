@@ -1127,7 +1127,7 @@ function JudgePanel() {
   );
 
   const renderJudgeProfile = () => (
-    <section className="grid gap-6 lg:grid-cols-[280px_1fr]">
+    <section className="grid-cols-1 lg:grid-cols-[280px_1fr] gap-6" style={{ display: 'grid' }}>
       <div className={`rounded-2xl p-5 ${card}`}>
         <div className="mx-auto w-full max-w-[240px]">
           <img
@@ -1169,7 +1169,7 @@ function JudgePanel() {
           </ul>
         </article>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid-cols-1 md:grid-cols-2 gap-6" style={{ display: 'grid' }}>
           <article className={`rounded-2xl p-5 ${card}`}>
             <h3 className="mb-3 text-lg font-semibold text-amber-400">Key responsibilities</h3>
             <ul className={`list-inside list-disc space-y-1 text-sm ${subtle}`}>
