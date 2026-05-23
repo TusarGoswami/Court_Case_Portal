@@ -650,6 +650,10 @@ a {
   gap: 14px;
   z-index: 2;
   transition: all 0.3s ease;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
 }
 
 .dashboard-logo {
@@ -1826,27 +1830,30 @@ a {
    THEME SWITCHER TOGGLE
 ═══════════════════════════════════════════════════ */
 .theme-switcher {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 10px;
+  margin-top: auto;
+  padding: 8px;
   background: rgba(0,0,0,0.2);
+  border-radius: 12px;
   border: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .theme-btn {
-  width: auto;
-  padding: 6px 10px;
+  width: 100%;
   border-radius: 8px;
-  font-size: 0.7rem;
+  padding: 8px;
+  font-size: 1rem;
   font-weight: 600;
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
   transition: all 0.25s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .theme-btn.active {
@@ -1857,24 +1864,6 @@ a {
 
 .theme-btn:hover:not(.active) {
   background: rgba(255,255,255,0.05);
-}
-
-.theme-switcher {
-  margin-top: auto;
-  padding: 10px;
-  background: rgba(0,0,0,0.2);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
-
-.theme-btn {
-  border-radius: 8px;
-  padding: 8px;
-  transition: all 0.2s ease;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ═══════════════════════════════════════════════════

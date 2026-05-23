@@ -129,7 +129,7 @@ function JudgeProfileView() {
             </aside>
 
             {/* Main Content - Parchment Style */}
-            <main className="parchment-panel" style={{ padding: 'clamp(20px, 6vw, 60px)' }}>
+            <main className="parchment-panel" style={{ padding: 'clamp(20px, 6vw, 60px)', background: 'linear-gradient(135deg, #F4ECD8 0%, #E7D8B5 100%)', border: '1px solid #C8B88A', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
               <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                 <h1 style={{ fontFamily: 'Cinzel, serif', color: '#3e2723', fontSize: '2.5rem', marginBottom: '10px' }}>Judicial Profile</h1>
                 <div style={{ width: '100px', height: '1px', background: '#3e2723', margin: '0 auto', opacity: 0.3 }} />

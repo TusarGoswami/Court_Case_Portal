@@ -512,7 +512,12 @@ function JudgePanel() {
               type="button"
               onClick={() => setFilterId(f.id)}
               className={`status-pill ${filterId === f.id ? 'active' : ''}`}
-              style={{ cursor: 'pointer', background: filterId === f.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)' }}
+              style={{ 
+                cursor: 'pointer', 
+                background: filterId === f.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                color: filterId === f.id ? '#0B132B' : 'inherit',
+                fontWeight: filterId === f.id ? '800' : '500'
+              }}
             >
               {f.label.toUpperCase()}
             </button>
@@ -569,7 +574,7 @@ function JudgePanel() {
                   <td>
                     <select
                       className="cinematic-input"
-                      style={{ padding: '4px 8px', fontSize: '0.7rem' }}
+                      style={{ padding: '4px 8px', fontSize: '0.7rem', width: 'auto', minWidth: '120px' }}
                       value={row.status}
                       disabled={benchBusy === row.id}
                       onClick={(e) => e.stopPropagation()}
@@ -646,10 +651,18 @@ function JudgePanel() {
                 onChange={(e) => setRemarkDrafts((prev) => ({ ...prev, [selectedCase.id]: e.target.value }))}
               />
               <div className="flex gap-3 mt-4">
-                <button className="cinematic-btn" style={{ flex: 1, fontSize: '0.75rem' }} onClick={() => openSchedulingForm(selectedCase)}>
+                <button 
+                  className="cinematic-btn" 
+                  style={{ flex: 1, padding: '12px', fontSize: '0.8rem', fontWeight: '800', fontFamily: "'Inter', sans-serif" }} 
+                  onClick={() => openSchedulingForm(selectedCase)}
+                >
                   SCHEDULE HEARING
                 </button>
-                <button className="ghost-btn" style={{ flex: 1 }} onClick={() => advanceStatus(selectedCase, "judgment_pending")}>
+                <button 
+                  className="ghost-btn" 
+                  style={{ flex: 1, padding: '12px', fontSize: '0.8rem', fontWeight: '800', fontFamily: "'Inter', sans-serif" }} 
+                  onClick={() => advanceStatus(selectedCase, "judgment_pending")}
+                >
                   RESERVE JUDGMENT
                 </button>
               </div>
