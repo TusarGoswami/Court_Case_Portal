@@ -223,8 +223,6 @@ function resolveAssetUrl(url) {
   return `${BACKEND_BASE}${clean}`;
 }
 
-const activeBenchStatuses = ["accepted", "verified", "assigned_to_judge", "hearing_scheduled", "judgment_pending", "judgment_reserved"];
-
 function Dashboard() {
   const [user, setUser] = useState(getStoredUser());
   const [cases, setCases] = useState([]);
@@ -540,14 +538,13 @@ function Dashboard() {
     }
   };
 
-  const assignedCases = useMemo(
-    () =>
-      cases.filter((c) => {
-        const s = (c.status || "").toLowerCase();
-        return s === "closed" || activeBenchStatuses.includes(s);
-      }),
-    [cases]
-  );
+  const assignedCases = useMemo(() => {
+    const activeBenchStatuses = ["accepted", "verified", "assigned_to_judge", "hearing_scheduled", "judgment_pending", "judgment_reserved"];
+    return cases.filter((c) => {
+      const s = (c.status || "").toLowerCase();
+      return s === "closed" || activeBenchStatuses.includes(s);
+    });
+  }, [cases]);
   const filteredAssignedCases = useMemo(() => {
     const sNorm = (c) => (c.status || "").toLowerCase();
     if (caseFilter === "accepted") {
