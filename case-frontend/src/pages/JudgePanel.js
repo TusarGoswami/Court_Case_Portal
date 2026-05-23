@@ -287,6 +287,8 @@ function JudgePanel() {
     });
   };
 
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
+
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 1000);
     return () => clearInterval(id);
@@ -1338,9 +1340,49 @@ function JudgePanel() {
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="status-pill" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
-                {notifications.length} ALERTS
-              </div>
+              <button 
+                type="button"
+                className="hover-highlight" 
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  border: '1px solid var(--border)', 
+                  borderRadius: '50%', 
+                  width: '36px', 
+                  height: '36px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.2s', 
+                  fontSize: '1rem', 
+                  position: 'relative',
+                  outline: 'none',
+                  padding: 0
+                }}
+                onClick={() => setShowAlertsModal(true)}
+                title={`${notifications.length} Alerts`}
+              >
+                🔔
+                {notifications.length > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    background: '#ef4444',
+                    color: 'white',
+                    fontSize: '0.6rem',
+                    fontWeight: 'bold',
+                    borderRadius: '50%',
+                    width: '16px',
+                    height: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
               <div className="status-pill" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
                 {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
@@ -1373,6 +1415,93 @@ function JudgePanel() {
           </div>
         </div>
       </main>
+
+      {showAlertsModal && (
+        <div 
+          className="modal-backdrop" 
+          onClick={() => setShowAlertsModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            display: 'grid',
+            placeItems: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+        >
+          <div 
+            className="cinematic-card" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 'min(500px, 95vw)',
+              maxHeight: '80vh',
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'rgba(11, 19, 43, 0.95)',
+              border: '1px solid var(--primary)',
+              borderRadius: '24px',
+              padding: '24px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+              <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', margin: 0, fontSize: '1.25rem' }}>Registry Notifications</h3>
+              <button 
+                onClick={() => setShowAlertsModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text)',
+                  fontSize: '1.2rem',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  lineHeight: 1,
+                  width: 'auto'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }} className="space-y-3">
+              {notifications.length ? (
+                notifications.map((note) => (
+                  <div 
+                    key={note.id || note._id} 
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      borderRadius: '16px',
+                      padding: '16px',
+                      display: 'flex',
+                      alignItems: 'start',
+                      gap: '12px'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem', marginTop: '2px' }}>🔔</span>
+                    <div>
+                      <strong style={{ display: 'block', color: 'white', fontSize: '0.9rem' }}>{note.title}</strong>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '4px 0 0', lineHeight: '1.4' }}>{note.message}</p>
+                      {note.created_at && (
+                        <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', display: 'block', marginTop: '8px' }}>
+                          {new Date(note.created_at).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)' }}>
+                  <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '12px' }}>📭</span>
+                  No alerts or registry notifications at this time.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
