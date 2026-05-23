@@ -347,7 +347,7 @@ export default function CreateCase() {
 
         {step === 2 && (
           <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
               <div>
                 <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>Select Legal Expert</h3>
                 <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Verified professionals assigned to your jurisdiction.</p>
@@ -362,7 +362,7 @@ export default function CreateCase() {
               {LAWYERS.map((l) => {
                 const active = selectedLawyer?.id === l.id;
                 return (
-                  <div key={l.id} className="kpi-card" style={{ border: active ? '2px solid var(--primary)' : '1px solid var(--border)', transition: 'all 0.3s ease', opacity: (selectedLawyer && !active) ? 0.6 : 1 }} onClick={() => setSelectedLawyer(l)}>
+                  <div key={l.id} className="kpi-card" style={{ border: active ? '2px solid var(--primary)' : '1px solid var(--border)', transition: 'all 0.3s ease', opacity: (selectedLawyer && !active) ? 0.6 : 1, display: 'flex', flexDirection: 'column', height: '100%' }} onClick={() => setSelectedLawyer(l)}>
                     <div style={{ height: '180px', overflow: 'hidden', borderRadius: '12px 12px 0 0', position: 'relative' }}>
                       <img src={resolveLawyerImage(l.photo_url, l.name)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 12px 12px', background: 'linear-gradient(to top, rgba(11,19,43,1), transparent)' }}>
@@ -370,7 +370,7 @@ export default function CreateCase() {
                         <p style={{ fontSize: '0.7rem', color: 'var(--primary)', letterSpacing: '0.1em' }}>{l.role.toUpperCase()}</p>
                       </div>
                     </div>
-                    <div style={{ padding: '16px' }}>
+                    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', textAlign: 'center' }}>
                           <p style={{ fontSize: '0.6rem', color: 'var(--muted)' }}>FEE</p>
@@ -381,8 +381,8 @@ export default function CreateCase() {
                           <p style={{ fontWeight: 'bold', color: '#4ade80' }}>{l.winPct}</p>
                         </div>
                       </div>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '8px' }}>{l.specializations.join(" • ")}</p>
-                      <button className={`theme-btn ${active ? 'active' : ''}`} style={{ width: '100%', fontSize: '0.75rem', padding: '8px' }}>{active ? "SELECTED" : "SELECT EXPERT"}</button>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '12px' }}>{l.specializations.join(" • ")}</p>
+                      <button className={`theme-btn ${active ? 'active' : ''}`} style={{ width: '100%', fontSize: '0.75rem', padding: '8px', marginTop: 'auto' }}>{active ? "SELECTED" : "SELECT EXPERT"}</button>
                     </div>
                   </div>
                 );
