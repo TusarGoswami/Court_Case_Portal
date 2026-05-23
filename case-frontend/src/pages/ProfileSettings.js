@@ -67,7 +67,7 @@ export default function ProfileSettings() {
     <div className="dashboard-layout" style={{ justifyContent: 'center', alignItems: 'center' }}>
       <FilingParticles />
       
-      <div className="panel" style={{ width: 'min(500px, 95vw)', background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(16px)', border: '1px solid var(--border)', padding: '32px', position: 'relative', zIndex: 10 }}>
+      <div className="panel" style={{ width: 'min(500px, 95vw)', background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(16px)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
             <h1 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>PROFILE SETTINGS</h1>

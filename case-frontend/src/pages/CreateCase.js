@@ -290,7 +290,7 @@ export default function CreateCase() {
         {step === 1 && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
             <div style={{ display: 'grid', gap: '24px' }}>
-              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)' }}>
                 <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part I: Petitioner Details</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <FilingInput label="Full Legal Name" value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} />
@@ -300,7 +300,7 @@ export default function CreateCase() {
                 </div>
               </section>
 
-              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)' }}>
                 <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part II: Incident & Case Particulars</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <FilingInput label="Case Title / Subject" value={form.caseTitle} onChange={e => setForm(p => ({ ...p, caseTitle: e.target.value }))} />
@@ -318,7 +318,7 @@ export default function CreateCase() {
                 </div>
               </section>
 
-              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: '32px' }}>
+              <section className="panel" style={{ background: 'rgba(30,37,65,0.4)', backdropFilter: 'blur(12px)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)' }}>
                 <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', marginBottom: '24px' }}>Part III: Evidentiary Documentation</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <FilingUploadBox title="Identity Proof" hint="Aadhaar / Passport (Required)" files={uploadBuckets.idProof} progressMap={uploadProgress} onFiles={f => addFilesToBucket("idProof", f)} onRemove={id => removeFile("idProof", id)} />
@@ -346,7 +346,7 @@ export default function CreateCase() {
         )}
 
         {step === 2 && (
-          <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: '32px' }}>
+          <div className="panel" style={{ background: 'rgba(30,37,65,0.4)', border: '1px solid var(--border)', padding: 'clamp(16px, 4vw, 32px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '32px' }}>
               <div>
                 <h3 style={{ fontFamily: 'Cinzel, serif', color: 'var(--primary)', fontSize: '1.5rem' }}>Select Legal Expert</h3>
