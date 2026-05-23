@@ -81,7 +81,7 @@ function FilingSelect({ label, options, ...props }) {
     <div className="input-group">
       {label && <label className="input-label">{label}</label>}
       <select {...props} className="auth-input" style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-        {options.map(o => <option key={o} value={o} style={{ background: '#0B132B' }}>{o}</option>)}
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
     </div>
   );
