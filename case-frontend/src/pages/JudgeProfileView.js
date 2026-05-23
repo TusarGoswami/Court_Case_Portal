@@ -179,8 +179,8 @@ function JudgeProfileView() {
               </div>
 
               <footer style={{ marginTop: '80px', paddingTop: '40px', borderTop: '1px solid rgba(0,0,0,0.1)', textAlign: 'center' }}>
-                 <img src="/images/judicial_stamp.png" alt="Stamp" style={{ width: '80px', opacity: 0.4, margin: '0 auto 16px' }} />
-                 <p style={{ fontSize: '0.65rem', opacity: 0.6, letterSpacing: '1px' }}>CERTIFIED RECORD OF THE NATIONAL JUDICIARY</p>
+                 <img src="/images/judicial_stamp.png" alt="Stamp" style={{ width: '85px', opacity: 0.85, margin: '0 auto 16px' }} />
+                 <p style={{ fontSize: '0.68rem', color: '#5d4037', opacity: 0.8, letterSpacing: '1px', fontWeight: 'bold' }}>CERTIFIED RECORD OF THE NATIONAL JUDICIARY</p>
               </footer>
             </main>
           </div>
