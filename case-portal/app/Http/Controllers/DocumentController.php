@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CaseDocument;
-use App\Models\CaseFile;
+use App\Models\CourtCase;
 use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class DocumentController extends Controller
             'file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
-        $caseFile = CaseFile::find($caseId);
+        $caseFile = CourtCase::find($caseId);
         if (!$caseFile) {
             return response()->json(['message' => 'Case not found'], 404);
         }

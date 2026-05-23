@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CaseFile;
+use App\Models\CourtCase;
 use App\Models\Hearing;
 use App\Models\PortalNotification;
 use App\Services\AuditLogger;
@@ -39,7 +39,7 @@ class HearingController extends Controller
             'status' => ['nullable', Rule::in(['scheduled', 'completed', 'adjourned', 'cancelled'])],
         ]);
 
-        $caseFile = CaseFile::find($validated['case_file_id']);
+        $caseFile = CourtCase::find($validated['case_file_id']);
 
         if (!$caseFile) {
             return response()->json(['message' => 'Case not found'], 404);

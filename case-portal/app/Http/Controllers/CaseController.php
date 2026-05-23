@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CaseFile;
+use App\Models\CourtCase;
 use App\Models\PortalNotification;
 use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
@@ -13,14 +13,16 @@ class CaseController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = CaseFile::query();
+        $query = CourtCase::query();
 
         if ($request->filled('search')) {
             $search = (string) $request->query('search');
             $query->where(function ($builder) use ($search) {
                 $builder->where('title', 'like', "%{$search}%")
                     ->orWhere('case_number', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    // Support searching incident description if it's a dynamic case creation flow
+                    ->orWhere('incident.description', 'like', "%{$search}%");
             });
         }
 
@@ -32,7 +34,7 @@ class CaseController extends Controller
             $query->where('priority', $request->query('priority'));
         }
 
-        $cases = $query->orderBy('created_at', 'desc')->limit(100)->get()->map(function (CaseFile $caseFile) {
+        $cases = $query->orderBy('created_at', 'desc')->limit(100)->get()->map(function (CourtCase $caseFile) {
             return $this->transform($caseFile);
         });
 
@@ -46,7 +48,7 @@ class CaseController extends Controller
             'case_number' => ['required', 'string', 'max:60'],
             'title' => ['required', 'string', 'max:160'],
             'description' => ['required', 'string', 'max:5000'],
-            'status' => ['required', Rule::in(['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed'])],
+            'status' => ['required', Rule::in(['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed', 'accepted', 'verified', 'assigned_to_judge', 'hearing_scheduled', 'judgment_pending'])],
             'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
             'court_room' => ['nullable', 'string', 'max:80'],
             'filed_at' => ['nullable', 'date'],
@@ -57,7 +59,7 @@ class CaseController extends Controller
             'assigned_clerk_id' => ['nullable', 'string'],
         ]);
 
-        $caseFile = CaseFile::create([
+        $caseFile = CourtCase::create([
             ...$validated,
             'created_by' => (string) $user->id,
             'priority' => $validated['priority'] ?? 'medium',
@@ -84,7 +86,7 @@ class CaseController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $caseFile = CaseFile::find($id);
+        $caseFile = CourtCase::find($id);
 
         if (!$caseFile) {
             return response()->json(['message' => 'Case not found'], 404);
@@ -95,7 +97,7 @@ class CaseController extends Controller
 
     public function update(Request $request, string $id, AuditLogger $auditLogger): JsonResponse
     {
-        $caseFile = CaseFile::find($id);
+        $caseFile = CourtCase::find($id);
         $user = $request->attributes->get('auth_user');
 
         if (!$caseFile) {
@@ -105,7 +107,7 @@ class CaseController extends Controller
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:160'],
             'description' => ['sometimes', 'string', 'max:5000'],
-            'status' => ['sometimes', Rule::in(['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed'])],
+            'status' => ['sometimes', Rule::in(['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed', 'accepted', 'verified', 'assigned_to_judge', 'hearing_scheduled', 'judgment_pending'])],
             'priority' => ['sometimes', Rule::in(['low', 'medium', 'high'])],
             'court_room' => ['nullable', 'string', 'max:80'],
             'next_hearing_at' => ['nullable', 'date'],
@@ -127,26 +129,42 @@ class CaseController extends Controller
     public function statuses(): JsonResponse
     {
         return response()->json([
-            'data' => ['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed'],
+            'data' => ['filed', 'under_review', 'scheduled', 'hearing_in_progress', 'judgment_reserved', 'closed', 'accepted', 'verified', 'assigned_to_judge', 'hearing_scheduled', 'judgment_pending'],
         ]);
     }
 
-    private function transform(CaseFile $caseFile, bool $withRelations = false): array
+    private function transform(CourtCase $caseFile, bool $withRelations = false): array
     {
+        $pet = data_get($caseFile->complainant, 'name')
+            ?: data_get($caseFile->complainant, 'full_name')
+            ?: 'Petitioner';
+        $resp = data_get($caseFile->accused, 'name')
+            ?: data_get($caseFile->accused, 'full_name')
+            ?: 'Respondent';
+        $resolvedTitle = $caseFile->title ?? "{$pet} vs {$resp}";
+
+        $resolvedDesc = $caseFile->description
+            ?? $caseFile->relief_requested
+            ?? data_get($caseFile->incident, 'description')
+            ?? data_get($caseFile->incident, 'details')
+            ?? data_get($caseFile->incident, 'summary')
+            ?? '';
+
         $payload = [
             'id' => (string) $caseFile->id,
             'case_number' => $caseFile->case_number,
-            'title' => $caseFile->title,
-            'description' => $caseFile->description,
+            'title' => $resolvedTitle,
+            'description' => $resolvedDesc,
             'status' => $caseFile->status,
             'priority' => $caseFile->priority,
             'court_room' => $caseFile->court_room,
-            'filed_at' => optional($caseFile->filed_at)->toISOString(),
-            'next_hearing_at' => optional($caseFile->next_hearing_at)->toISOString(),
+            'filed_at' => optional($caseFile->filed_at)->toISOString() ?? optional($caseFile->created_at)->toISOString(),
+            'next_hearing_at' => optional($caseFile->next_hearing_at)->toISOString() ?? optional($caseFile->slot_time)->toISOString(),
+            'slot_time' => optional($caseFile->next_hearing_at)->toISOString() ?? optional($caseFile->slot_time)->toISOString(),
             'parties' => $caseFile->parties ?? [],
             'tags' => $caseFile->tags ?? [],
             'created_by' => $caseFile->created_by,
-            'assigned_judge_id' => $caseFile->assigned_judge_id,
+            'assigned_judge_id' => $caseFile->assigned_judge_id ?? $caseFile->judge_id,
             'assigned_clerk_id' => $caseFile->assigned_clerk_id,
             'created_at' => optional($caseFile->created_at)->toISOString(),
             'updated_at' => optional($caseFile->updated_at)->toISOString(),

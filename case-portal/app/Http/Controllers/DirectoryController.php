@@ -101,13 +101,28 @@ class DirectoryController extends Controller
             return response()->json(['message' => 'lawyer_id required'], 422);
         }
 
-        $start = Carbon::today();
-        $end = Carbon::today()->addDays($days);
-
         $booked = Booking::where('lawyer_id', $lawyerId)
             ->whereIn('status', ['reserved', 'confirmed'])
             ->pluck('slot_time')
             ->toArray();
+
+        // Convert Carbon/DateTime/MongoDB UTCDateTime objects to ISO-8601 strings for proper comparison.
+        $booked = array_map(function ($time) {
+            try {
+                if ($time instanceof \Carbon\Carbon) {
+                    return $time->toISOString();
+                }
+                if ($time instanceof \DateTimeInterface) {
+                    return $time->format(\DateTime::ATOM);
+                }
+                if (is_object($time) && method_exists($time, 'toDateTime')) {
+                    return Carbon::instance($time->toDateTime())->toISOString();
+                }
+                return Carbon::parse((string) $time)->toISOString();
+            } catch (\Throwable $e) {
+                return (string) $time;
+            }
+        }, $booked);
 
         $slots = [];
         $times = ['10:00', '11:00', '12:00', '14:00', '15:00', '16:00'];
@@ -122,7 +137,7 @@ class DirectoryController extends Controller
                     'slot_time' => $slot->toISOString(),
                     'date' => $date->format('Y-m-d'),
                     'time' => $time,
-                    'is_booked' => in_array($slot->toISOString(), $booked),
+                    'is_booked' => in_array($slot->toISOString(), $booked, true),
                 ];
             }
         }

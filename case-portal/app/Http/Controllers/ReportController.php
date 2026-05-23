@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
-use App\Models\CaseFile;
+use App\Models\CourtCase;
 use App\Models\Hearing;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -15,14 +15,14 @@ class ReportController extends Controller
     {
         $stats = [
             'total_users' => User::count(),
-            'total_cases' => CaseFile::count(),
-            'open_cases' => CaseFile::whereNotIn('status', ['closed'])->count(),
-            'closed_cases' => CaseFile::where('status', 'closed')->count(),
+            'total_cases' => CourtCase::count(),
+            'open_cases' => CourtCase::whereNotIn('status', ['closed'])->count(),
+            'closed_cases' => CourtCase::where('status', 'closed')->count(),
             'scheduled_hearings' => Hearing::where('status', 'scheduled')->count(),
             'audit_events' => AuditLog::count(),
         ];
 
-        $statusBreakdown = CaseFile::raw(function ($collection) {
+        $statusBreakdown = CourtCase::raw(function ($collection) {
             return $collection->aggregate([
                 ['$group' => ['_id' => '$status', 'count' => ['$sum' => 1]]],
             ]);
