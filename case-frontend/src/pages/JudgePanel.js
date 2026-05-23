@@ -1110,11 +1110,11 @@ function JudgePanel() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-bold text-white">Visual Bench Theme</div>
-              <div className="muted-text text-xs">Switch between classic and midnight judicial themes.</div>
+              <div className="muted-text text-xs">Switch between midnight and chambers judicial themes.</div>
             </div>
             <button 
               className="theme-btn active" 
-              onClick={() => setTheme(theme === 'midnight' ? 'classic' : 'midnight')}
+              onClick={() => setTheme(theme === 'midnight' ? 'chambers' : 'midnight')}
               style={{ fontSize: '0.7rem' }}
             >
               {theme.toUpperCase()}
