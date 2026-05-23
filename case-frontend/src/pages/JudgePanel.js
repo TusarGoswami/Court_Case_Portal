@@ -277,17 +277,38 @@ function JudgePanel() {
     if (!selectedCase?.id) return;
     const docKey = `${selectedCase.id}_${docUrl}`;
     setEvidenceStatuses(prev => {
-      const updated = { ...prev, [docKey]: prev[docKey] === action ? null : action };
+      const isUndoing = prev[docKey] === action;
+      const updated = { ...prev, [docKey]: isUndoing ? null : action };
       try {
         localStorage.setItem("evidence_statuses", JSON.stringify(updated));
       } catch (e) {
         console.error(e);
       }
+      
+      if (isUndoing) {
+        showToast("Evidence status reset.", 'success');
+      } else {
+        const title = selectedCase.id_proof_url === docUrl ? "Identity / FIR annex" : "Exhibit Document";
+        showToast(`${title} has been ${action === 'accepted' ? 'accepted ✅' : 'rejected ❌'}.`, 'success');
+      }
+      
       return updated;
     });
   };
 
   const [showAlertsModal, setShowAlertsModal] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     const id = setInterval(() => setClock(new Date()), 1000);
@@ -457,8 +478,15 @@ function JudgePanel() {
       setBenchBusy(row.id);
       await api.patch(`/judge/court-cases/${row.id}`, { status });
       await loadDashboard();
+      
+      let msg = `Case status updated to ${status.toUpperCase()}.`;
+      if (status === 'accepted') msg = "Case is assigned to Judge successfully.";
+      else if (status === 'verified') msg = "Case is verified successfully.";
+      else if (status === 'judgment_pending' || status === 'judgment_reserved') msg = "Judgment is reserved. Case updated to judgment pending.";
+      else if (status === 'closed') msg = "Case is closed successfully.";
+      showToast(msg, 'success');
     } catch (e) {
-      alert(e?.response?.data?.message || "Bench update failed");
+      showToast(e?.response?.data?.message || "Bench update failed", 'error');
     } finally {
       setBenchBusy(null);
     }
@@ -481,7 +509,7 @@ function JudgePanel() {
 
     const draft = hearingDrafts[row.id] || buildHearingDraft(row);
     if (!draft.scheduled_at) {
-      alert("Please choose a hearing date and time before scheduling.");
+      showToast("Please choose a hearing date and time before scheduling.", "error");
       return;
     }
 
@@ -498,8 +526,9 @@ function JudgePanel() {
       });
       await loadDashboard();
       setActiveNav("Hearings");
+      showToast("Hearing is scheduled successfully. Counsel and clerk have been notified.", 'success');
     } catch (e) {
-      alert(e?.response?.data?.message || "Hearing scheduling failed");
+      showToast(e?.response?.data?.message || "Hearing scheduling failed", 'error');
     } finally {
       setBenchBusy(null);
     }
@@ -1502,6 +1531,36 @@ function JudgePanel() {
           </div>
         </div>
       )}
+
+      {toast && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(212, 175, 55, 0.95)',
+            color: toast.type === 'error' ? 'white' : '#0B132B',
+            padding: '16px 24px',
+            borderRadius: '12px',
+            fontWeight: 'bold',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            animation: 'slideIn 0.3s ease-out'
+          }}
+        >
+          <span>{toast.type === 'error' ? '❌' : '✅'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+      <style>{`
+        @keyframes slideIn {
+          from { transform: translateX(120%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
